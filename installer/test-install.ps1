@@ -12,9 +12,12 @@ $ErrorActionPreference = 'Stop'
 if ($UninstallFirst) {
     $roots = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall', 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall'
     foreach ($entry in Get-ChildItem $roots -ErrorAction SilentlyContinue | Get-ItemProperty) {
-        if ($entry.DisplayName -like $UninstallFirst -and $entry.BundleCachePath) {
-            Write-Host "Uninstalling $($entry.DisplayName)"
+        if ($entry.DisplayName -notlike $UninstallFirst) { continue }
+        Write-Host "Uninstalling $($entry.DisplayName)"
+        if ($entry.BundleCachePath) {
             Start-Process $entry.BundleCachePath -ArgumentList '/uninstall', '/quiet' -Wait
+        } elseif ($entry.PSChildName -match '^\{[0-9A-Fa-f-]+\}$') {
+            Start-Process msiexec.exe -ArgumentList '/x', $entry.PSChildName, '/qn', '/norestart' -Wait
         }
     }
 }

@@ -2,9 +2,22 @@
 # has no Python, then checks the right Python was installed and the app starts.
 param(
     [Parameter(Mandatory = $true)][string]$ExpectedPython,  # e.g. Python38-32
-    [string]$ExtraArgs = ''
+    [string]$ExtraArgs = '',
+    # Fully uninstall Pythons matching this name first (e.g. "Python 3.12.* (32-bit)"),
+    # because GitHub's machines come with some Python versions installed.
+    [string]$UninstallFirst = ''
 )
 $ErrorActionPreference = 'Stop'
+
+if ($UninstallFirst) {
+    $roots = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall', 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall'
+    foreach ($entry in Get-ChildItem $roots -ErrorAction SilentlyContinue | Get-ItemProperty) {
+        if ($entry.DisplayName -like $UninstallFirst -and $entry.BundleCachePath) {
+            Write-Host "Uninstalling $($entry.DisplayName)"
+            Start-Process $entry.BundleCachePath -ArgumentList '/uninstall', '/quiet' -Wait
+        }
+    }
+}
 
 # Hide every registered Python so the installer must install its own.
 foreach ($key in 'HKLM:\SOFTWARE\Python\PythonCore', 'HKLM:\SOFTWARE\WOW6432Node\Python\PythonCore', 'HKCU:\SOFTWARE\Python\PythonCore') {

@@ -72,7 +72,7 @@ jobs:
 
       - name: Install on a Windows 10/11 PC without Python (Python 3.12 expected)
         timeout-minutes: 15
-        run: ./installer/test-install.ps1 -ExpectedPython Python312-32
+        run: ./installer/test-install.ps1 -ExpectedPython Python312-32 -UninstallFirst 'Python 3.12.* (32-bit)'
 
       - name: Show install logs
         if: failure()

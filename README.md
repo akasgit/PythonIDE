@@ -117,8 +117,8 @@ The error-help language can be set to English, Nepali or both from the **View** 
 - `installer/PythonIDE.iss` is the Inno Setup script for the Windows installer.
   GitHub Actions (`.github/workflows/build-installer.yml`) tests the app on Windows
   with Python 3.8, builds the installer, installs it on a clean machine and checks
-  that PythonIDE starts. Pushing a tag such as `v1.0.0` publishes the installer
-  on the Releases page.
+  that PythonIDE starts. Publishing a release on GitHub (with a tag such as
+  `v1.0.0`) builds the installer and attaches it to the release automatically.
 
 Run the tests:
 

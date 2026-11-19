@@ -83,6 +83,11 @@ class PythonIdeTest extends TestCase
             ->assertHeader('Cross-Origin-Opener-Policy', 'same-origin')
             ->assertHeader('Cross-Origin-Embedder-Policy', 'require-corp')
             ->assertSee('IDE_CONFIG', false);
+        $this->get('/ide/python/runner')->assertOk()
+            ->assertHeader('Content-Type', 'text/plain; charset=utf-8')
+            ->assertHeader('Cross-Origin-Embedder-Policy', 'require-corp');
+        $this->get('/ide/python/secret')->assertNotFound();
+        $this->get('/ide/python/..%2F..%2F.env')->assertNotFound();
         $this->get('/ide/worker.js')->assertOk()
             ->assertHeader('Cross-Origin-Embedder-Policy', 'require-corp')
             ->assertHeader('Content-Type', 'text/javascript; charset=utf-8');

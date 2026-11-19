@@ -32,6 +32,7 @@ class IdeController extends Controller
                 'program' => $program,
                 'workerUrl' => url('/ide/worker.js').'?v='.$this->version(),
                 'assetBase' => url('/ide-assets'),
+                'pythonUrl' => url('/ide/python'),
                 'pyodideUrl' => url('/pyodide').'/',
                 'version' => $this->version(),
             ],
@@ -51,9 +52,25 @@ class IdeController extends Controller
         ]);
     }
 
+    /**
+     * The Python files that run inside the browser. They are sent by Laravel
+     * because many shared hosts block or try to execute .py files.
+     */
+    public function python(string $name)
+    {
+        abort_unless(in_array($name.'.py', self::PYTHON_FILES, true), 404);
+
+        return response()->file(resource_path('ide/py/'.$name.'.py'), [
+            'Content-Type' => 'text/plain; charset=utf-8',
+            'Cache-Control' => 'public, max-age=3600',
+        ]);
+    }
+
+    public const PYTHON_FILES = ['_shared.py', 'errors.py', 'runner.py', 'turtle.py'];
+
     private function version(): string
     {
         return substr(md5((string) @filemtime(resource_path('ide/worker.js'))
-            .@filemtime(public_path('ide-assets/ide.js')).@filemtime(public_path('ide-assets/py/runner.py'))), 0, 8);
+            .@filemtime(public_path('ide-assets/ide.js')).@filemtime(resource_path('ide/py/runner.py')).@filemtime(resource_path('ide/py/errors.py'))), 0, 8);
     }
 }

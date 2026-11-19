@@ -100,7 +100,7 @@
             status('Python could not start: ' + (e.message || 'unknown problem') + '. Try reloading the page.');
         };
         worker.postMessage({
-            type: 'init', pyodideUrl: CONFIG.pyodideUrl, assetBase: CONFIG.assetBase,
+            type: 'init', pyodideUrl: CONFIG.pyodideUrl, pythonUrl: CONFIG.pythonUrl,
             version: CONFIG.version, sync: shared.sync, data: shared.data, interrupt: shared.interrupt,
         });
     }

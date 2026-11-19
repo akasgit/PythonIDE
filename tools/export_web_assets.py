@@ -18,7 +18,7 @@ sys.path.insert(0, ROOT)
 
 from pythonide import examples, examples_class10  # noqa: E402
 
-PY_DIR = os.path.join(ROOT, "web", "public", "ide-assets", "py")
+PY_DIR = os.path.join(ROOT, "web", "resources", "ide", "py")
 EXAMPLES_JSON = os.path.join(ROOT, "web", "public", "ide-assets", "examples.json")
 COPIED = ["_shared.py", "errors.py"]
 

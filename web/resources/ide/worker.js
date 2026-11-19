@@ -57,8 +57,9 @@ async function init(msg) {
     pyodide.setInterruptBuffer(interrupt);
     pyodide.registerJsModule('ide', ide);
     for (const name of ['_shared.py', 'errors.py', 'runner.py', 'turtle.py']) {
-        const response = await fetch(msg.assetBase + '/py/' + name + '?v=' + msg.version);
-        if (!response.ok) throw new Error('Could not load ' + name);
+        // Fetched without ".py" in the address (see routes/web.php).
+        const response = await fetch(msg.pythonUrl + '/' + name.replace(/\.py$/, '') + '?v=' + msg.version);
+        if (!response.ok) throw new Error('Could not load ' + name + ' (HTTP ' + response.status + ')');
         pyodide.FS.writeFile('/home/pyodide/' + name, await response.text());
     }
     pyodide.runPython('import sys; sys.path.insert(0, "/home/pyodide")');

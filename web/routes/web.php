@@ -26,6 +26,8 @@ Route::post('/logout', [AuthController::class, 'logout'])->middleware('auth')->n
 // The IDE works without logging in too (programs are then kept in the browser).
 Route::get('/ide', [IdeController::class, 'show'])->name('ide');
 Route::get('/ide/worker.js', [IdeController::class, 'worker']);
+// No ".py" in the address: some hosts block or run anything ending in .py.
+Route::get('/ide/python/{name}', [IdeController::class, 'python'])->where('name', '[a-z_]+');
 
 Route::middleware('auth')->group(function () {
     Route::get('/programs', [ProgramController::class, 'index'])->name('programs');

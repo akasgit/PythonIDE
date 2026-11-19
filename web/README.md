@@ -90,8 +90,8 @@ All accounts and saved programs are in the MySQL database. Use cPanel → *Backu
 | Laravel app (accounts, classes, saved programs, install page) | `app/`, `routes/web.php`, `resources/views/` |
 | The editor page | `resources/views/ide.blade.php`, `public/ide-assets/ide.js`, `public/css/app.css` |
 | Runs Python in a Web Worker | `resources/ide/worker.js` (served by Laravel so it always gets the right headers) |
-| Python that runs a student's program, plus step mode | `public/ide-assets/py/runner.py` |
-| Browser version of `turtle` | `public/ide-assets/py/turtle.py` |
+| Python that runs a student's program, plus step mode | `resources/ide/py/runner.py` |
+| Browser version of `turtle` | `resources/ide/py/turtle.py` |
 | Error help and examples | Copied from the desktop app by `tools/export_web_assets.py` |
 | CodeMirror 5 (the code editor) | `public/lib/codemirror/` |
 | Pyodide 0.26.4 (Python 3.12) | `public/pyodide/`, downloaded by `tools/fetch-pyodide.sh` |

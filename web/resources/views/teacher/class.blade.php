@@ -20,10 +20,10 @@
     <tbody>
     @foreach ($students as $s)
         <tr>
-            <td><a href="{{ route('students.show', $s) }}">{{ $s->name }}</a></td>
-            <td><code>{{ $s->username }}</code></td>
-            <td>{{ $s->programs_count }}</td>
-            <td class="muted">{{ $s->programs_max_updated_at ? \Illuminate\Support\Carbon::parse($s->programs_max_updated_at)->diffForHumans() : '-' }}</td>
+            <td data-label="Student" class="main"><a href="{{ route('students.show', $s) }}">{{ $s->name }}</a></td>
+            <td data-label="Username"><code>{{ $s->username }}</code></td>
+            <td data-label="Programs">{{ $s->programs_count }}</td>
+            <td class="muted" data-label="Last saved">{{ $s->programs_max_updated_at ? \Illuminate\Support\Carbon::parse($s->programs_max_updated_at)->diffForHumans() : '-' }}</td>
             <td class="actions">
                 <a class="btn small" href="{{ route('students.show', $s) }}">View work</a>
                 <form method="post" action="{{ url('/students/'.$s->id.'/password') }}" onsubmit="return confirm('Give {{ addslashes($s->name) }} a new password?')">

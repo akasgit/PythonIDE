@@ -10,9 +10,9 @@
     <tbody>
     @foreach ($classrooms as $c)
         <tr>
-            <td><a href="{{ route('classes.show', $c) }}">{{ $c->name }}</a></td>
-            <td>{{ $c->students_count }}</td>
-            @if (auth()->user()->is_admin)<td class="muted">{{ $c->teacher->name }}</td>@endif
+            <td data-label="Class" class="main"><a href="{{ route('classes.show', $c) }}">{{ $c->name }}</a></td>
+            <td data-label="Students">{{ $c->students_count }}</td>
+            @if (auth()->user()->is_admin)<td class="muted" data-label="Teacher">{{ $c->teacher->name }}</td>@endif
         </tr>
     @endforeach
     </tbody>

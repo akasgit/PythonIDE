@@ -30,7 +30,7 @@
     </nav>
     <div class="who">
         @auth
-            <a href="{{ route('account') }}" title="Account">{{ auth()->user()->name }}</a>
+            <a href="{{ route('account') }}" title="Account" class="me">{{ auth()->user()->name }}</a>
             <form method="post" action="{{ route('logout') }}">@csrf<button class="link">Log out</button></form>
         @else
             <a href="{{ route('login') }}">Log in</a>

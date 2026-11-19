@@ -13,8 +13,8 @@
     <tbody>
     @foreach ($programs as $p)
         <tr>
-            <td><a href="{{ route('ide') }}?program={{ $p->id }}">{{ $p->title }}</a></td>
-            <td class="muted">{{ $p->updated_at->diffForHumans() }}</td>
+            <td data-label="Name"><a href="{{ route('ide') }}?program={{ $p->id }}">{{ $p->title }}</a></td>
+            <td class="muted" data-label="Last saved">{{ $p->updated_at->diffForHumans() }}</td>
             <td class="actions">
                 <a class="btn small" href="{{ route('ide') }}?program={{ $p->id }}">Open</a>
                 <form method="post" action="{{ route('programs.destroy', $p) }}" onsubmit="return confirm('Delete {{ addslashes($p->title) }}?')">

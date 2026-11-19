@@ -12,8 +12,8 @@
     <tbody>
     @foreach ($programs as $p)
         <tr>
-            <td>{{ $p->title }}</td>
-            <td class="muted">{{ $p->updated_at->diffForHumans() }} <span class="small">({{ $p->updated_at->format('Y-m-d H:i') }})</span></td>
+            <td data-label="Program" class="main">{{ $p->title }}</td>
+            <td class="muted" data-label="Last saved">{{ $p->updated_at->diffForHumans() }} <span class="small">({{ $p->updated_at->format('Y-m-d H:i') }})</span></td>
             <td class="actions"><a class="btn small" href="{{ route('ide') }}?program={{ $p->id }}">Open and run</a></td>
         </tr>
     @endforeach

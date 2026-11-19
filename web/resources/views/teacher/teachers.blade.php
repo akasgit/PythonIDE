@@ -7,9 +7,9 @@
     <tbody>
     @foreach ($teachers as $t)
         <tr>
-            <td>{{ $t->name }} @if ($t->is_admin)<span class="tag">admin</span>@endif</td>
-            <td><code>{{ $t->username }}</code></td>
-            <td>{{ $t->classrooms_count }}</td>
+            <td data-label="Name" class="main">{{ $t->name }} @if ($t->is_admin)<span class="tag">admin</span>@endif</td>
+            <td data-label="Username"><code>{{ $t->username }}</code></td>
+            <td data-label="Classes">{{ $t->classrooms_count }}</td>
             <td class="actions">
                 @if ($t->id !== auth()->id())
                 <form method="post" action="{{ url('/teachers/'.$t->id.'/password') }}" onsubmit="return confirm('Give {{ addslashes($t->name) }} a new password?')">

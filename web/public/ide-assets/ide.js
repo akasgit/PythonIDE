@@ -18,6 +18,7 @@
         set(key, value) { try { localStorage.setItem('pythonide.' + key, value); } catch (e) { /* private mode */ } },
     };
     const $ = (id) => document.getElementById(id);
+    const isPhone = () => window.matchMedia('(max-width: 760px)').matches;
     const el = {
         output: $('output'), input: $('input'), inputRow: $('input-row'), enter: $('btn-enter'),
         status: $('status'), vars: $('vars'), varsHint: $('vars-hint'), title: $('title'),
@@ -148,6 +149,8 @@
             el.varsHint.textContent = 'Green rows changed in the last step.';
             showTab('vars');
         }
+        // On a phone the output is below the editor: bring it into view.
+        if (isPhone() && !step) $('output').scrollIntoView({ behavior: 'smooth', block: 'center' });
         const run = { type: 'run', code: currentSource, step: !!step };
         if (ready) {
             worker.postMessage(run);
@@ -776,6 +779,13 @@
         const open = !menu.classList.contains('open');
         closeMenus();
         if (open) {
+            if (isPhone()) {
+                // The toolbar scrolls sideways on phones, so place the menu
+                // under the toolbar across the whole screen.
+                menu.style.top = (document.querySelector('.toolbar').getBoundingClientRect().bottom + 4) + 'px';
+            } else {
+                menu.style.top = '';
+            }
             menu.classList.add('open');
             if (fill) fill();
         }
@@ -911,6 +921,26 @@
 
     window.addEventListener('beforeunload', (e) => {
         if (dirty && (CONFIG.user || CONFIG.program)) { e.preventDefault(); e.returnValue = ''; }
+    });
+
+    // ------------------------------------------------------------- phones
+
+    // Extra keys that phone keyboards don't have (Tab) or hide (: ( " ...).
+    document.querySelectorAll('#keybar button').forEach((b) => {
+        b.addEventListener('mousedown', (e) => e.preventDefault()); // keep the keyboard open
+        b.addEventListener('click', () => {
+            if (editor.getOption('readOnly')) return;
+            const key = b.dataset.key;
+            if (key === 'tab') editor.execCommand(editor.somethingSelected() ? 'indentMore' : 'insertSoftTab');
+            else if (key === 'untab') editor.execCommand('indentLess');
+            else if (key === 'undo') editor.execCommand('undo');
+            else if (key.length === 2 && '()[]""'.includes(key)) {
+                editor.replaceSelection(key);
+                const cur = editor.getCursor();
+                editor.setCursor({ line: cur.line, ch: cur.ch - 1 }); // cursor between the pair
+            } else editor.replaceSelection(key);
+            editor.focus();
+        });
     });
 
     // ------------------------------------------------------------- start

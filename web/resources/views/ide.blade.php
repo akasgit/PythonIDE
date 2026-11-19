@@ -19,11 +19,11 @@
             <div class="menu" id="examples-menu"></div>
         </div>
         <span class="gap"></span>
-        <button class="tb run" id="btn-run" title="Run (F5)">Run (F5)</button>
+        <button class="tb run" id="btn-run" title="Run (F5)">Run<span class="key"> (F5)</span></button>
         <button class="tb stop" id="btn-stop" title="Stop (Shift+F5)" disabled>Stop</button>
         <span class="gap"></span>
-        <button class="tb step" id="btn-step" title="Run one line at a time (F6)">Step (F6)</button>
-        <button class="tb step" id="btn-next" title="Next step (F7)" disabled>Next (F7)</button>
+        <button class="tb step" id="btn-step" title="Run one line at a time (F6)">Step<span class="key"> (F6)</span></button>
+        <button class="tb step" id="btn-next" title="Next step (F7)" disabled>Next<span class="key"> (F7)</span></button>
         <button class="tb step" id="btn-end" title="Run to the end (F8)" disabled>To end</button>
         <label class="tb-label" title="Go to the next step by itself"><input type="checkbox" id="auto"> Auto</label>
         <input type="range" id="speed" min="150" max="1500" step="50" value="700" title="Auto speed: slow ← → fast" style="direction: rtl" hidden>
@@ -46,7 +46,20 @@
     </div>
     <div class="workspace" id="workspace">
         <div class="left" id="left">
-            <div class="editor-wrap"><textarea id="code"></textarea></div>
+            <div class="editor-wrap">
+                <div class="keybar" id="keybar" aria-label="Extra keys">
+                    <button data-key="tab" title="Indent">Tab ⇥</button>
+                    <button data-key="untab" title="Un-indent">⇤</button>
+                    <button data-key=":">:</button>
+                    <button data-key="()">( )</button>
+                    <button data-key='""'>" "</button>
+                    <button data-key="=">=</button>
+                    <button data-key="[]">[ ]</button>
+                    <button data-key="#">#</button>
+                    <button data-key="undo" title="Undo">↶</button>
+                </div>
+                <textarea id="code"></textarea>
+            </div>
             <div class="sash-h" id="sash-h" title="Drag to resize"></div>
             <div class="panel">
                 <div class="panel-head">Output<span class="spacer"></span>

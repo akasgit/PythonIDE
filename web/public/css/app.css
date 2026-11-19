@@ -249,9 +249,72 @@ details.menu-group > summary:hover { background: var(--button-active); }
 .cm-s-pyide .gutter-step { background: var(--step-line); color: var(--fg) !important; font-weight: bold; }
 .cm-s-pyide .gutter-error { background: var(--error-line); color: var(--error-line-fg) !important; font-weight: bold; }
 
+.keybar { display: none; }
+.site-header nav a { white-space: nowrap; }
+
+/* ===================== Phones and small tablets ===================== */
 @media (max-width: 760px) {
-    .workspace { grid-template-columns: 1fr; grid-template-rows: 1fr auto; }
-    .sash-v { display: none; }
-    .side { max-height: 30vh; }
+    body { font-size: 15px; }
+    .site-header { height: auto; flex-wrap: wrap; gap: 4px 10px; padding: 6px 10px; }
+    .site-header nav { order: 3; flex: 1 1 100%; overflow-x: auto; scrollbar-width: none; }
+    .site-header nav::-webkit-scrollbar { display: none; }
+    .who { margin-left: auto; gap: 8px; }
+    .who .me { max-width: 120px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: inline-block; vertical-align: bottom; }
+    .page { padding: 12px 12px 30px; }
+    h1 { font-size: 21px; }
+    .card { padding: 14px; }
+    .card.narrow { margin: 16px auto; }
+    .form.inline input { flex: 1 1 160px; min-width: 0; }
+
+    /* Tables become one card per row */
+    .table, .table tbody, .table tr, .table td { display: block; width: 100%; }
+    .table thead { display: none; }
+    .table { border: 0; background: none; }
+    .table tr { background: var(--panel); border: 1px solid var(--sash); border-radius: 8px; margin-bottom: 10px; padding: 6px 0; }
+    .table td { border: 0; padding: 3px 12px; }
+    .table td[data-label]::before { content: attr(data-label) ": "; color: var(--muted); font-size: 13px; }
+    .table td.main { font-weight: 600; font-size: 16px; }
+    .table td.main::before { content: none; }
+    .table .actions { justify-content: flex-start; padding-top: 6px; }
+
+    /* IDE: everything stacked, the page scrolls */
+    body.ide-page { height: auto; min-height: 100vh; overflow: visible; }
+    .ide { display: block; }
+    /* One slim row you can swipe sideways, pinned to the top. */
+    .toolbar {
+        position: sticky; top: 0; z-index: 30; gap: 5px; padding: 5px 6px;
+        flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none;
+    }
+    .toolbar::-webkit-scrollbar { display: none; }
+    .toolbar > * { flex: 0 0 auto; }
+    /* Run controls first, where the thumb can reach them. */
+    #btn-run, #btn-stop, #btn-step, #btn-next, #btn-end { order: -2; }
+    .tb-label, #speed { order: -1; }
+    .toolbar .gap, .toolbar .spacer, .key { display: none; }
+    .tb { padding: 7px 10px; font-size: 14px; }
     .title-box { width: 120px; }
+    #speed { width: 60px; }
+    /* Menus open as a panel across the screen (placed by ide.js). */
+    .menu { position: fixed; left: 8px !important; right: 8px; min-width: 0; max-height: 65vh; }
+    .workspace { display: flex; flex-direction: column; background: none; }
+    .left { display: flex; flex-direction: column; }
+    .sash-v, .sash-h { display: none; }
+    .editor-wrap { height: 48vh; min-height: 230px; display: flex; flex-direction: column; }
+    .editor-wrap .CodeMirror { flex: 1; height: auto; }
+    .keybar {
+        display: flex; gap: 4px; overflow-x: auto; padding: 4px 6px; background: var(--header);
+        scrollbar-width: none;
+    }
+    .keybar::-webkit-scrollbar { display: none; }
+    .keybar button {
+        flex: 0 0 auto; min-width: 40px; padding: 6px 10px; border: 1px solid var(--sash); border-radius: 6px;
+        background: var(--button); color: var(--text); font: bold 15px Consolas, "DejaVu Sans Mono", monospace;
+    }
+    .output { min-height: 28vh; max-height: 60vh; }
+    .side { border-top: 6px solid var(--sash); }
+    .vars-wrap { max-height: 45vh; }
+    .drawing-wrap { padding: 6px; }
+    .drawing-wrap canvas { width: 100%; height: auto; }
+    .loading { position: fixed; }
+    .input-row input { font-size: 16px; } /* 16px stops phones zooming in when typing */
 }

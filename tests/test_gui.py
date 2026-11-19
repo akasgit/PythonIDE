@@ -76,6 +76,21 @@ class AppTest(unittest.TestCase):
         self.wait_for(lambda: self.app.mode == "idle")
         self.assertIn("2", self.output())
 
+    def test_themes(self):
+        from pythonide import themes
+        size = self.app.code_font.cget("size")
+        for name, theme in themes.THEMES.items():
+            self.app.apply_theme(name)
+            self.root.update()
+            self.assertEqual(self.app.editor.text.cget("bg"), theme["bg"])
+            self.assertEqual(self.app.output.cget("bg"), theme["out_bg"])
+        self.app.apply_theme("projector")
+        self.assertEqual(self.app.code_font.cget("weight"), "bold")
+        self.assertGreaterEqual(self.app.code_font.cget("size"), 18)
+        self.app.apply_theme("light")
+        self.assertEqual(self.app.code_font.cget("weight"), "normal")
+        self.assertEqual(self.app.code_font.cget("size"), size)
+
     def test_every_example_compiles(self):
         from pythonide import examples
         for _, items in examples.EXAMPLES:

@@ -386,6 +386,7 @@ WELCOME = '''\
 #   Run  (F5)  runs your program
 #   Step (F6)  runs it one line at a time so you can watch the variables
 #   Examples   menu has ready-made programs to try
+#   F9         changes the colours: Light, Dark or Projector (big, bold text)
 #
 # Lines starting with # are comments. Python ignores them.
 

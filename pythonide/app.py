@@ -10,7 +10,7 @@ import traceback
 from tkinter import filedialog, messagebox, ttk
 import tkinter.font as tkfont
 
-from . import errors, examples
+from . import errors, examples, themes
 from .editor import CodeEditor
 from .runner import ProcessRunner
 from .stepper import StepRunner
@@ -22,17 +22,8 @@ SETTINGS_FILE = os.path.join(SETTINGS_DIR, "settings.json")
 MY_EXAMPLES_DIR = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "examples")
 MAX_OUTPUT_LINES = 3000
 
-DEFAULT_SETTINGS = {"font_size": 14, "language": "both", "geometry": "1100x700", "auto_delay": 700}
-
-COLOURS = {
-    "run": "#2e7d32",
-    "stop": "#c62828",
-    "step": "#1565c0",
-    "toolbar": "#e8eef5",
-    "out_bg": "#fbfbfb",
-    "input_wait": "#fff59d",
-    "changed": "#c8f7c5",
-}
+DEFAULT_SETTINGS = {"font_size": 14, "language": "both", "geometry": "1100x700", "auto_delay": 700,
+                    "theme": themes.DEFAULT}
 
 
 def programs_folder():
@@ -61,6 +52,8 @@ class App:
         self.auto_job = None
         self.prev_values = {}
         self.run_started = 0.0
+        self.theme = themes.get(self.settings.get("theme"))
+        self._painted = []  # (widget, {option: theme colour name}) for theme changes
 
         root.title(APP_NAME)
         root.geometry(self.settings["geometry"])
@@ -90,12 +83,23 @@ class App:
         nepali = pick_font(["Nirmala UI", "Mangal", "Noto Sans Devanagari", "Lohit Devanagari"],
                            self.ui_font.actual("family"))
         self.nepali_font = tkfont.Font(family=nepali, size=12)
+        # Fonts for the error help and the Variables panel (bigger in Projector theme).
+        self.help_font = self.ui_font.copy()
+        self.help_bold = self.bold_font.copy()
+        self.help_title = self.big_bold.copy()
+        self.var_font = self.ui_font.copy()
+        self.var_bold = self.bold_font.copy()
 
-        style = ttk.Style()
-        style.configure("Treeview", rowheight=int(self.ui_font.metrics("linespace") * 1.5))
-        style.configure("Treeview.Heading", font=self.bold_font)
+        self.style = ttk.Style()
+        try:
+            self.style.theme_use("clam")  # the ttk theme that follows our colours everywhere
+        except tk.TclError:
+            pass
+        self.style.configure("Treeview", font=self.var_font)
+        self.style.configure("Treeview.Heading", font=self.var_bold, relief="flat")
 
         self.language = tk.StringVar(value=self.settings["language"])
+        self.theme_name = tk.StringVar(value=self.settings.get("theme", themes.DEFAULT))
         self.auto_play = tk.BooleanVar(value=False)
 
         self._build_menu()
@@ -103,6 +107,7 @@ class App:
         self._build_body()
         self._build_statusbar()
         self._bind_keys()
+        self.apply_theme(self.theme_name.get(), first=True)
 
         if path and os.path.exists(path):
             self._open_path(path)
@@ -160,6 +165,12 @@ class App:
         m.add_command(label="Bigger text", accelerator="Ctrl++", command=lambda: self.zoom(1))
         m.add_command(label="Smaller text", accelerator="Ctrl+-", command=lambda: self.zoom(-1))
         m.add_separator()
+        m.add_command(label="Theme:", state="disabled")
+        for name, theme in themes.THEMES.items():
+            m.add_radiobutton(label="   " + theme["label"], variable=self.theme_name, value=name,
+                              command=lambda n=name: self.apply_theme(n))
+        m.add_command(label="   Next theme", accelerator="F9", command=self.next_theme)
+        m.add_separator()
         m.add_radiobutton(label="Error help in English", variable=self.language, value="en",
                           command=self._save_settings)
         m.add_radiobutton(label="Error help in Nepali (नेपाली)", variable=self.language, value="ne",
@@ -200,44 +211,58 @@ class App:
                 found.append((name[:-3].replace("_", " "), os.path.join(MY_EXAMPLES_DIR, name)))
         return found
 
+    def _paint(self, widget, **roles):
+        """Colour ``widget`` from the theme now and whenever the theme changes.
+
+        ``roles`` maps a widget option to a theme colour name,
+        e.g. ``bg="panel", fg="text"``.
+        """
+        self._painted.append((widget, roles))
+        widget.configure(**{opt: self.theme[key] for opt, key in roles.items()})
+        return widget
+
     def _build_toolbar(self):
-        bar = tk.Frame(self.root, bg=COLOURS["toolbar"], padx=6, pady=5)
+        bar = self._paint(tk.Frame(self.root, padx=6, pady=5), bg="toolbar")
         bar.pack(side="top", fill="x")
 
-        def button(text, command, colour=None, tip=None):
-            opts = dict(text=text, command=command, font=self.big_bold if colour else self.ui_font,
-                        padx=10, pady=3, relief="flat", bd=0, cursor="hand2")
+        def button(text, command, colour=None):
+            b = tk.Button(bar, text=text, command=command, font=self.big_bold if colour else self.ui_font,
+                          padx=10, pady=3, relief="flat", bd=0, cursor="hand2")
             if colour:
-                opts.update(bg=colour, fg="white", activebackground=colour, activeforeground="white",
-                            disabledforeground="#dddddd")
+                b.configure(fg="white", activeforeground="white", disabledforeground="#dddddd")
+                self._paint(b, bg=colour, activebackground=colour)
             else:
-                opts.update(bg="#ffffff", activebackground="#dde7f3")
-            b = tk.Button(bar, **opts)
+                self._paint(b, bg="button", fg="text", activebackground="button_active",
+                            activeforeground="text")
             b.colour = colour
             b.pack(side="left", padx=3)
             return b
 
+        def gap():
+            self._paint(tk.Frame(bar, width=12), bg="toolbar").pack(side="left")
+
         button("New", self.new_file)
         button("Open", self.open_file)
         button("Save", self.save)
-        mb = tk.Menubutton(bar, text="Examples \u25be", font=self.ui_font, bg="#ffffff", relief="flat",
-                           padx=10, pady=4, cursor="hand2", menu=self.examples_menu,
-                           activebackground="#dde7f3")
+        mb = tk.Menubutton(bar, text="Examples \u25be", font=self.ui_font, relief="flat",
+                           padx=10, pady=4, cursor="hand2", menu=self.examples_menu)
+        self._paint(mb, bg="button", fg="text", activebackground="button_active", activeforeground="text")
         mb.pack(side="left", padx=3)
-        tk.Frame(bar, width=12, bg=COLOURS["toolbar"]).pack(side="left")
-        self.run_btn = button("Run (F5)", self.run, COLOURS["run"])
-        self.stop_btn = button("Stop", self.stop, COLOURS["stop"])
-        tk.Frame(bar, width=12, bg=COLOURS["toolbar"]).pack(side="left")
-        self.step_btn = button("Step (F6)", self.step_start, COLOURS["step"])
-        self.next_btn = button("Next (F7)", self.step_next, COLOURS["step"])
-        self.end_btn = button("To end", self.step_to_end, COLOURS["step"])
+        gap()
+        self.run_btn = button("Run (F5)", self.run, "run")
+        self.stop_btn = button("Stop", self.stop, "stop")
+        gap()
+        self.step_btn = button("Step (F6)", self.step_start, "step")
+        self.next_btn = button("Next (F7)", self.step_next, "step")
+        self.end_btn = button("To end", self.step_to_end, "step")
         self.auto_chk = tk.Checkbutton(bar, text="Auto", variable=self.auto_play, font=self.ui_font,
-                                       bg=COLOURS["toolbar"], activebackground=COLOURS["toolbar"],
                                        command=self._auto_toggled)
+        self._paint(self.auto_chk, bg="toolbar", fg="text", activebackground="toolbar",
+                    activeforeground="text", selectcolor="button")
         self.auto_chk.pack(side="left", padx=(6, 0))
         self.speed = tk.Scale(bar, from_=1500, to=150, orient="horizontal", showvalue=False,
-                              length=70, bg=COLOURS["toolbar"], highlightthickness=0, bd=0,
-                              troughcolor="#ffffff", resolution=50)
+                              length=70, highlightthickness=0, bd=0, resolution=50)
+        self._paint(self.speed, bg="toolbar", troughcolor="button", activebackground="button_active")
         self.speed.set(self.settings.get("auto_delay", 700))
         self.speed.pack(side="left")
 
@@ -247,66 +272,67 @@ class App:
             b.pack(side="right", padx=1)
 
     def _build_body(self):
-        outer = tk.PanedWindow(self.root, orient="horizontal", sashwidth=6, bd=0, bg="#c9d3df")
+        P = self._paint
+        outer = P(tk.PanedWindow(self.root, orient="horizontal", sashwidth=6, bd=0), bg="sash")
         outer.pack(side="top", fill="both", expand=True)
 
-        left = tk.PanedWindow(outer, orient="vertical", sashwidth=6, bd=0, bg="#c9d3df")
-        self.editor = CodeEditor(left, self.code_font, on_change=self._on_code_change)
+        left = P(tk.PanedWindow(outer, orient="vertical", sashwidth=6, bd=0), bg="sash")
+        self.editor = CodeEditor(left, self.code_font, self.theme, on_change=self._on_code_change)
         left.add(self.editor, minsize=150, stretch="always")
 
-        out_frame = tk.Frame(left, bg=COLOURS["out_bg"])
-        head = tk.Frame(out_frame, bg="#dfe6ee")
+        out_frame = P(tk.Frame(left), bg="out_bg")
+        head = P(tk.Frame(out_frame), bg="header")
         head.pack(side="top", fill="x")
-        tk.Label(head, text="Output", font=self.bold_font, bg="#dfe6ee", padx=8, pady=2).pack(side="left")
-        tk.Button(head, text="Clear", command=self.clear_output, relief="flat", bg="#dfe6ee",
-                  activebackground="#cfd8e3", cursor="hand2").pack(side="right", padx=4)
+        P(tk.Label(head, text="Output", font=self.bold_font, padx=8, pady=2),
+          bg="header", fg="text").pack(side="left")
+        P(tk.Button(head, text="Clear", command=self.clear_output, relief="flat", cursor="hand2",
+                    bd=0, highlightthickness=0, padx=8),
+          bg="header", fg="text", activebackground="header_active",
+          activeforeground="text").pack(side="right", padx=4)
 
-        input_row = tk.Frame(out_frame, bg="#dfe6ee", pady=4, padx=6)
+        input_row = P(tk.Frame(out_frame, pady=4, padx=6), bg="header")
         input_row.pack(side="bottom", fill="x")
-        self.input_label = tk.Label(input_row, text="Input:", bg="#dfe6ee", font=self.ui_font)
+        self.input_label = P(tk.Label(input_row, text="Input:", font=self.ui_font), bg="header", fg="text")
         self.input_label.pack(side="left")
-        self.input_entry = tk.Entry(input_row, font=self.out_font, relief="flat",
-                                    disabledbackground="#eeeeee")
+        self.input_entry = P(tk.Entry(input_row, font=self.out_font, relief="flat"),
+                             fg="text", disabledbackground="entry_disabled", insertbackground="cursor")
         self.input_entry.pack(side="left", fill="x", expand=True, padx=6, ipady=3)
         self.input_entry.bind("<Return>", self._send_input)
         self.input_entry.bind("<KP_Enter>", self._send_input)
         self.send_btn = tk.Button(input_row, text="Enter", command=self._send_input, relief="flat",
-                                  bg=COLOURS["run"], fg="white", activebackground=COLOURS["run"],
-                                  padx=10, cursor="hand2")
+                                  fg="white", padx=10, cursor="hand2")
+        P(self.send_btn, bg="run", activebackground="run")
         self.send_btn.pack(side="left")
 
-        self.output = tk.Text(out_frame, font=self.out_font, bg=COLOURS["out_bg"], wrap="word",
-                              height=10, bd=0, highlightthickness=0, padx=8, pady=4,
-                              state="disabled", cursor="arrow")
-        out_scroll = tk.Scrollbar(out_frame, command=self.output.yview)
+        self.output = tk.Text(out_frame, font=self.out_font, wrap="word", height=10, bd=0,
+                              highlightthickness=0, padx=8, pady=4, state="disabled", cursor="arrow")
+        P(self.output, bg="out_bg", fg="out_fg", selectbackground="select", insertbackground="cursor")
+        out_scroll = ttk.Scrollbar(out_frame, command=self.output.yview)
         self.output.configure(yscrollcommand=out_scroll.set)
         out_scroll.pack(side="right", fill="y")
         self.output.pack(side="left", fill="both", expand=True)
         o = self.output
-        o.tag_configure("stderr", foreground="#b00000")
-        o.tag_configure("typed", foreground="#1565c0", font=self._font_variant(self.out_font, "bold"))
-        o.tag_configure("info", foreground="#777777")
-        o.tag_configure("err_title", foreground="#b00000", font=self.big_bold, spacing1=6)
-        o.tag_configure("err_text", foreground="#3a3a3a", font=self.ui_font, lmargin1=12, lmargin2=12)
-        o.tag_configure("err_ne", foreground="#3a3a3a", font=self.nepali_font, lmargin1=12, lmargin2=12)
-        o.tag_configure("hint", foreground="#1b5e20", font=self.bold_font, lmargin1=12, lmargin2=12,
-                        spacing1=4)
-        o.tag_configure("hint_ne", foreground="#1b5e20", font=self.nepali_font, lmargin1=12, lmargin2=12)
-        o.tag_configure("tech", foreground="#888888", lmargin1=12, lmargin2=12, spacing1=4)
+        o.tag_configure("typed", font=self._font_variant(self.out_font, "bold"))
+        o.tag_configure("err_title", font=self.help_title, spacing1=6)
+        o.tag_configure("err_text", font=self.help_font, lmargin1=12, lmargin2=12)
+        o.tag_configure("err_ne", font=self.nepali_font, lmargin1=12, lmargin2=12)
+        o.tag_configure("hint", font=self.help_bold, lmargin1=12, lmargin2=12, spacing1=4)
+        o.tag_configure("hint_ne", font=self.nepali_font, lmargin1=12, lmargin2=12)
+        o.tag_configure("tech", lmargin1=12, lmargin2=12, spacing1=4)
         # Let students select and copy from the output with the keyboard too.
         o.bind("<1>", lambda e: o.focus_set())
 
         left.add(out_frame, minsize=120, stretch="always")
         outer.add(left, minsize=400, stretch="always")
 
-        right = tk.Frame(outer, bg="#ffffff")
-        tk.Label(right, text="Variables", font=self.bold_font, bg="#dfe6ee", anchor="w",
-                 padx=8, pady=2).pack(side="top", fill="x")
+        right = P(tk.Frame(outer), bg="panel")
+        P(tk.Label(right, text="Variables", font=self.bold_font, anchor="w", padx=8, pady=2),
+          bg="header", fg="text").pack(side="top", fill="x")
         self.var_hint = tk.Label(right, text="Run or Step your program to see its variables here.",
-                                 bg="#ffffff", fg="#666666", wraplength=260, justify="left",
-                                 anchor="w", padx=8, pady=4)
+                                 wraplength=260, justify="left", anchor="w", padx=8, pady=4)
+        P(self.var_hint, bg="panel", fg="muted")
         self.var_hint.pack(side="top", fill="x")
-        tree_frame = tk.Frame(right)
+        tree_frame = P(tk.Frame(right), bg="panel")
         tree_frame.pack(side="top", fill="both", expand=True)
         self.vars = ttk.Treeview(tree_frame, columns=("value", "type"), selectmode="browse")
         self.vars.heading("#0", text="Name", anchor="w")
@@ -315,8 +341,7 @@ class App:
         self.vars.column("#0", width=128, stretch=False)
         self.vars.column("value", width=90, stretch=True)
         self.vars.column("type", width=140, stretch=False)
-        self.vars.tag_configure("changed", background=COLOURS["changed"])
-        self.vars.tag_configure("scope", font=self.bold_font)
+        self.vars.tag_configure("scope", font=self.var_bold)
         vs = ttk.Scrollbar(tree_frame, orient="vertical", command=self.vars.yview)
         self.vars.configure(yscrollcommand=vs.set)
         vs.pack(side="right", fill="y")
@@ -331,8 +356,9 @@ class App:
 
     def _build_statusbar(self):
         self.status_var = tk.StringVar()
-        bar = tk.Label(self.root, textvariable=self.status_var, anchor="w", bg="#f3f3f3",
-                       fg="#333333", padx=8, pady=3, font=self.ui_font)
+        bar = tk.Label(self.root, textvariable=self.status_var, anchor="w", padx=8, pady=3,
+                       font=self.ui_font)
+        self._paint(bar, bg="status_bg", fg="text")
         bar.pack(side="bottom", fill="x", before=self.root.pack_slaves()[0])
         self.status_bar = bar
 
@@ -344,6 +370,7 @@ class App:
         r.bind_all("<F7>", lambda e: self.step_next())
         r.bind_all("<F8>", lambda e: self.step_to_end())
         r.bind_all("<F1>", lambda e: self.show_cheat_sheet())
+        r.bind_all("<F9>", lambda e: self.next_theme())
         for key, action in (("n", self.new_file), ("o", self.open_file), ("s", self.save)):
             r.bind_all("<Control-{}>".format(key), lambda e, a=action: (a(), "break")[1])
             r.bind_all("<Control-{}>".format(key.upper()), lambda e, a=action: (a(), "break")[1])
@@ -625,7 +652,7 @@ class App:
     def _set_waiting(self, waiting):
         self.waiting_input = waiting
         if waiting:
-            self.input_entry.configure(state="normal", bg=COLOURS["input_wait"])
+            self.input_entry.configure(state="normal", bg=self.theme["input_wait"])
             self.input_label.configure(text="Type here and press Enter:", font=self.bold_font)
             self.send_btn.configure(state="normal")
             self.input_entry.focus_set()
@@ -647,9 +674,9 @@ class App:
         self.editor.set_readonly(mode == "step")
         self._set_waiting(False)
 
-    @staticmethod
-    def _enable(button, on):
-        colour = button.colour if on else "#aab4bf"
+    def _enable(self, button, on):
+        button.enabled = on
+        colour = self.theme[button.colour if on else "button_disabled"]
         button.configure(state="normal" if on else "disabled", bg=colour, activebackground=colour)
 
     def _poll(self):
@@ -791,17 +818,84 @@ class App:
     # Misc
     # ======================================================================
 
+    def next_theme(self):
+        names = list(themes.THEMES)
+        current = names.index(self.theme_name.get()) if self.theme_name.get() in names else 0
+        self.apply_theme(names[(current + 1) % len(names)])
+        return "break"
+
+    def apply_theme(self, name, first=False):
+        """Switch every colour in the window to the theme ``name``."""
+        old = self.theme
+        self.theme = theme = themes.get(name)
+        self.theme_name.set(name if name in themes.THEMES else themes.DEFAULT)
+        for widget, roles in self._painted:
+            widget.configure(**{opt: theme[key] for opt, key in roles.items()})
+        for b in (self.run_btn, self.stop_btn, self.step_btn, self.next_btn, self.end_btn):
+            self._enable(b, getattr(b, "enabled", True))
+        if not self.waiting_input:
+            self.input_entry.configure(bg=theme["entry"])
+        else:
+            self.input_entry.configure(bg=theme["input_wait"])
+
+        o = self.output
+        for tag, key in (("stderr", "stderr"), ("typed", "typed"), ("info", "info"),
+                         ("err_title", "err_title"), ("err_text", "err_text"), ("err_ne", "err_text"),
+                         ("hint", "hint"), ("hint_ne", "hint"), ("tech", "tech")):
+            o.tag_configure(tag, foreground=theme[key])
+
+        st = self.style
+        st.configure("Treeview", background=theme["panel"], fieldbackground=theme["panel"],
+                     foreground=theme["text"], bordercolor=theme["sash"])
+        st.map("Treeview", background=[("selected", theme["select"])],
+               foreground=[("selected", theme["text"])])
+        st.configure("Treeview.Heading", background=theme["header"], foreground=theme["text"])
+        st.map("Treeview.Heading", background=[("active", theme["header_active"])])
+        st.configure("TScrollbar", background=theme["button"], troughcolor=theme["panel"],
+                     arrowcolor=theme["text"], bordercolor=theme["sash"])
+        st.map("TScrollbar", background=[("active", theme["button_active"])])
+        self.vars.tag_configure("changed", background=theme["changed"])
+
+        # Bold, bigger code for the projector theme; back to normal afterwards.
+        weight = "bold" if theme["bold_code"] else "normal"
+        self.code_font.configure(weight=weight)
+        self.out_font.configure(weight=weight)
+        size = self.code_font.cget("size")
+        if theme["min_font"] and size < theme["min_font"]:
+            self.settings["font_size_before_theme"] = size
+            self._set_font_size(theme["min_font"])
+        elif not theme["min_font"] and old["min_font"] and not first:
+            before = self.settings.pop("font_size_before_theme", None)
+            if before:
+                self._set_font_size(before)
+        boost = theme["text_boost"]
+        base = self.ui_font.cget("size")
+        for font, size in ((self.help_font, base), (self.help_bold, base), (self.help_title, base + 1),
+                           (self.var_font, base), (self.var_bold, base), (self.nepali_font, base + 1)):
+            font.configure(size=size + boost)
+        st.configure("Treeview", rowheight=int(self.var_font.metrics("linespace") * 1.5))
+        self.editor.apply_theme(theme)
+        self.editor.set_font(self.code_font)
+        if not first:
+            self.settings["theme"] = self.theme_name.get()
+            self._save_settings()
+            self.status("Theme: {}".format(theme["label"]))
+
     def status(self, text):
         self.status_var.set(text)
 
     def zoom(self, delta):
-        size = max(9, min(36, self.code_font.cget("size") + delta))
+        self._set_font_size(self.code_font.cget("size") + delta)
+        self.settings.pop("font_size_before_theme", None)
+        self._save_settings()
+        return "break"
+
+    def _set_font_size(self, size):
+        size = max(9, min(36, size))
         self.code_font.configure(size=size)
         self.out_font.configure(size=size - 1)
         self.editor.set_font(self.code_font)
         self.settings["font_size"] = size
-        self._save_settings()
-        return "break"
 
     def _text_event(self, name):
         widget = self.root.focus_get()
@@ -832,7 +926,8 @@ class App:
         text.configure(yscrollcommand=scroll.set)
         scroll.pack(side="right", fill="y")
         text.pack(fill="both", expand=True)
-        text.tag_configure("h", font=self.big_bold, foreground="#1565c0", spacing1=10)
+        text.configure(bg=self.theme["bg"], fg=self.theme["fg"])
+        text.tag_configure("h", font=self.big_bold, foreground=self.theme["heading"], spacing1=10)
         for line in CHEAT_SHEET.splitlines(True):
             if line.startswith("## "):
                 text.insert("end", line[3:], "h")

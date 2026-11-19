@@ -5,26 +5,9 @@ import builtins
 import keyword
 import re
 import tkinter as tk
+from tkinter import ttk
 
 INDENT = "    "
-
-THEME = {
-    "bg": "#ffffff",
-    "fg": "#1e1e1e",
-    "gutter_bg": "#f0f0f0",
-    "gutter_fg": "#8a8a8a",
-    "current_line": "#f5f9ff",
-    "select": "#cce4ff",
-    "keyword": "#0000cc",
-    "builtin": "#8a2be2",
-    "string": "#067d17",
-    "comment": "#8c8c8c",
-    "number": "#c45200",
-    "defname": "#0b6e99",
-    "step_line": "#fff3a0",
-    "error_line": "#ffd6d6",
-}
-
 
 def _make_pattern():
     kw = r"\b(?:" + "|".join(keyword.kwlist) + r")\b"
@@ -48,23 +31,21 @@ TOKEN_TAGS = ("comment", "string", "defname", "keyword", "builtin", "number")
 
 
 class CodeEditor(tk.Frame):
-    def __init__(self, master, font, on_change=None, **kw):
-        tk.Frame.__init__(self, master, bg=THEME["bg"], **kw)
+    def __init__(self, master, font, theme, on_change=None, **kw):
+        tk.Frame.__init__(self, master, **kw)
         self.font = font
+        self.theme = theme
         self.on_change = on_change
         self._highlight_job = None
 
-        self.gutter = tk.Canvas(self, width=40, bg=THEME["gutter_bg"],
-                                highlightthickness=0, bd=0)
+        self.gutter = tk.Canvas(self, width=40, highlightthickness=0, bd=0)
         self.text = tk.Text(
             self, undo=True, maxundo=-1, autoseparators=True, wrap="none",
-            font=font, bg=THEME["bg"], fg=THEME["fg"], insertbackground="#000000",
-            selectbackground=THEME["select"], inactiveselectbackground=THEME["select"],
-            bd=0, highlightthickness=0, padx=6, pady=4, insertwidth=2,
+            font=font, bd=0, highlightthickness=0, padx=6, pady=4, insertwidth=2,
             tabs=(font.measure(INDENT),),
         )
-        self.vbar = tk.Scrollbar(self, orient="vertical", command=self.text.yview)
-        self.hbar = tk.Scrollbar(self, orient="horizontal", command=self.text.xview)
+        self.vbar = ttk.Scrollbar(self, orient="vertical", command=self.text.yview)
+        self.hbar = ttk.Scrollbar(self, orient="horizontal", command=self.text.xview)
         self.text.configure(yscrollcommand=self._on_yscroll, xscrollcommand=self.hbar.set)
 
         self.gutter.grid(row=0, column=0, sticky="ns")
@@ -74,12 +55,8 @@ class CodeEditor(tk.Frame):
         self.grid_rowconfigure(0, weight=1)
         self.grid_columnconfigure(1, weight=1)
 
-        for tag in TOKEN_TAGS:
-            self.text.tag_configure(tag, foreground=THEME[tag])
         self.text.tag_configure("keyword", font=self._bold())
-        self.text.tag_configure("current_line", background=THEME["current_line"])
-        self.text.tag_configure("step_line", background=THEME["step_line"])
-        self.text.tag_configure("error_line", background=THEME["error_line"])
+        self.apply_theme(theme)
         self.text.tag_raise("sel")
 
         t = self.text
@@ -139,6 +116,20 @@ class CodeEditor(tk.Frame):
         self.font = font
         self.text.configure(font=font, tabs=(font.measure(INDENT),))
         self.text.tag_configure("keyword", font=self._bold())
+        self.redraw_gutter()
+
+    def apply_theme(self, theme):
+        self.theme = t = theme
+        self.configure(bg=t["bg"])
+        self.gutter.configure(bg=t["gutter_bg"])
+        self.text.configure(bg=t["bg"], fg=t["fg"], insertbackground=t["cursor"],
+                            selectbackground=t["select"], inactiveselectbackground=t["select"],
+                            selectforeground=t["fg"])
+        for tag in TOKEN_TAGS:
+            self.text.tag_configure(tag, foreground=t[tag])
+        self.text.tag_configure("current_line", background=t["current_line"])
+        self.text.tag_configure("step_line", background=t["step_line"])
+        self.text.tag_configure("error_line", background=t["error_line"])
         self.redraw_gutter()
 
     def set_readonly(self, readonly):
@@ -213,13 +204,14 @@ class CodeEditor(tk.Frame):
                 break
             y, height = info[1], info[3]
             lineno = int(index.split(".")[0])
-            colour = THEME["gutter_fg"]
+            t = self.theme
+            colour = t["gutter_fg"]
             if lineno == step_line:
-                g.create_rectangle(0, y, width, y + height, fill=THEME["step_line"], width=0)
-                colour = "#000000"
+                g.create_rectangle(0, y, width, y + height, fill=t["step_line"], width=0)
+                colour = t["gutter_mark_fg"]
             elif lineno == error_line:
-                g.create_rectangle(0, y, width, y + height, fill=THEME["error_line"], width=0)
-                colour = "#b00000"
+                g.create_rectangle(0, y, width, y + height, fill=t["error_line"], width=0)
+                colour = t["error_line_fg"]
             g.create_text(width - 8, y + height // 2, anchor="e", text=str(lineno),
                           font=self.font, fill=colour)
             nxt = self.text.index("{}+1line".format(index))

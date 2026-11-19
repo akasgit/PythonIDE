@@ -26,7 +26,13 @@ nothing else to install.
   syllabus: input/output, simple interest, if/elif, loops, factorial, prime,
   Fibonacci, strings, lists, functions and turtle drawing.
 - **Cheat sheet (F1).** A one-page Python reference.
-- **Big text for projectors.** Use **A+ / A-** or Ctrl + mouse wheel.
+- **Themes for any room.** In **View → Theme** (or press **F9**), choose:
+  - **Light:** the normal look.
+  - **Dark:** easy on the eyes in a dim room.
+  - **Projector:** high contrast with big, bold code and bigger help text, so it
+    stays readable when the projector washes out colours.
+
+  **A+ / A-** (or Ctrl + mouse wheel) change the text size in any theme.
 - **Turtle graphics.** Turtle programs work with Run, and the drawing window stays
   open until it is closed.
 
@@ -102,6 +108,7 @@ The error-help language can be set to English, Nepali or both from the **View** 
 | Ctrl+/ | Comment or uncomment lines |
 | Tab / Shift+Tab | Indent / un-indent (also works on selected lines) |
 | Ctrl + / Ctrl − | Bigger / smaller text |
+| F9 | Next colour theme (Light / Dark / Projector) |
 
 ## For developers
 
@@ -113,6 +120,7 @@ The error-help language can be set to English, Nepali or both from the **View** 
 - `pythonide/errors.py` contains the friendly error explanations. To improve a
   message or the Nepali text, edit it there.
 - `pythonide/examples.py` holds the built-in examples.
+- `pythonide/themes.py` holds the colour themes.
 
 - `installer/PythonIDE.iss` is the Inno Setup script for the Windows installer.
   GitHub Actions (`.github/workflows/build-installer.yml`) tests the app on Windows

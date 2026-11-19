@@ -20,6 +20,12 @@ MARK = "\x1e"
 
 def main():
     path = os.path.abspath(sys.argv[1])
+    # On Windows, print() would write "\r\n"; the IDE expects plain "\n".
+    for stream in (sys.stdout, sys.stderr):
+        try:
+            stream.reconfigure(newline="\n")
+        except (AttributeError, ValueError):
+            pass
     out = sys.stdout
 
     def send(**msg):

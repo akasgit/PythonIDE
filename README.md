@@ -22,9 +22,13 @@ nothing else to install.
   the slider sets the speed.
 - **Variables panel.** After a normal run it shows the final values, so students
   see what their program did.
-- **Examples menu.** 33 ready-made programs following the Class 9–10
-  syllabus: input/output, simple interest, if/elif, loops, factorial, prime,
-  Fibonacci, strings, lists, functions and turtle drawing.
+- **Examples menu.** 79 ready-made programs:
+  - **Basics (33):** input/output, simple interest, if/elif, loops, factorial,
+    prime, Fibonacci, strings, lists, functions and turtle drawing.
+  - **Class 10 (46):** functions (QBASIC SUB/FUNCTION in Python), number programs
+    (Armstrong, palindrome, perfect, HCF/LCM, binary), series and patterns
+    (including the NEPAL pattern), string handling, lists/tuples/dictionaries,
+    bubble sort, file handling with student records, and try/except.
 - **Cheat sheet (F1).** A one-page Python reference.
 - **Themes for any room.** In **View → Theme** (or press **F9**), choose:
   - **Light:** the normal look.
@@ -119,7 +123,8 @@ The error-help language can be set to English, Nepali or both from the **View** 
 - `pythonide/stepper.py` runs step mode using `sys.settrace`.
 - `pythonide/errors.py` contains the friendly error explanations. To improve a
   message or the Nepali text, edit it there.
-- `pythonide/examples.py` holds the built-in examples.
+- `pythonide/examples.py` and `pythonide/examples_class10.py` hold the built-in
+  examples.
 - `pythonide/themes.py` holds the colour themes.
 
 - `installer/PythonIDE.iss` is the Inno Setup script for the Windows installer.

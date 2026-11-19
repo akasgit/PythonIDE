@@ -10,7 +10,7 @@ import traceback
 from tkinter import filedialog, messagebox, ttk
 import tkinter.font as tkfont
 
-from . import errors, examples, themes
+from . import errors, examples, examples_class10, themes
 from .editor import CodeEditor
 from .runner import ProcessRunner
 from .stepper import StepRunner
@@ -194,6 +194,14 @@ class App:
             for title, code in items:
                 sub.add_command(label=title, command=lambda t=title, c=code: self.load_example(t, c))
             menu.add_cascade(label=group, menu=sub)
+        menu.add_separator()
+        class10 = tk.Menu(menu, tearoff=False, font=self.ui_font)
+        for group, items in examples_class10.CLASS10:
+            sub = tk.Menu(class10, tearoff=False, font=self.ui_font)
+            for title, code in items:
+                sub.add_command(label=title, command=lambda t=title, c=code: self.load_example(t, c))
+            class10.add_cascade(label=group, menu=sub)
+        menu.add_cascade(label="Class 10", menu=class10)
         mine = self._my_examples()
         if mine:
             menu.add_separator()
@@ -561,7 +569,7 @@ class App:
             path = os.path.join(folder, "program.py")
             with open(path, "w", encoding="utf-8") as f:
                 f.write(source)
-            cwd = programs_folder() if os.path.isdir(programs_folder()) else HOME
+            cwd = self._work_folder()
         self._source = source
         self.runner = ProcessRunner(path, cwd)
         try:
@@ -572,6 +580,17 @@ class App:
             return
         self._set_mode("run")
         self.status("Running...  Press Stop (Shift+F5) to stop it.")
+
+    def _work_folder(self):
+        """The folder a program reads and writes its files in."""
+        if self.path:
+            return os.path.dirname(self.path)
+        folder = programs_folder()
+        try:
+            os.makedirs(folder, exist_ok=True)
+            return folder
+        except OSError:
+            return HOME
 
     def step_start(self):
         if self.mode == "step":
@@ -584,6 +603,12 @@ class App:
                 APP_NAME, "Turtle drawings cannot be shown in Step mode.\nUse Run (F5) for turtle programs.",
                 parent=self.root)
             return
+        # Files the program opens (e.g. students.txt) are in the same folder
+        # as with Run, not in PythonIDE's own folder.
+        try:
+            os.chdir(self._work_folder())
+        except OSError:
+            pass
         self.runner = StepRunner(self._source)
         self.runner.start()
         self._set_mode("step")

@@ -92,10 +92,17 @@ class AppTest(unittest.TestCase):
         self.assertEqual(self.app.code_font.cget("size"), size)
 
     def test_every_example_compiles(self):
-        from pythonide import examples
-        for _, items in examples.EXAMPLES:
+        from pythonide import examples, examples_class10
+        for _, items in examples.EXAMPLES + examples_class10.CLASS10:
             for title, code in items:
                 compile(code, title, "exec")
+
+    def test_examples_menu(self):
+        self.app._fill_examples_menu()
+        menu = self.app.examples_menu
+        labels = [menu.entrycget(i, "label") for i in range(menu.index("end") + 1)
+                  if menu.type(i) == "cascade"]
+        self.assertIn("Class 10", labels)
 
 
 if __name__ == "__main__":

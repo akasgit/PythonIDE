@@ -40,13 +40,16 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Download Python 3.8.10 installer
+      - name: Download Python installers
         run: |
-          Invoke-WebRequest https://www.python.org/ftp/python/3.8.10/python-3.8.10.exe -OutFile installer/python-3.8.10.exe
-          $sig = Get-AuthenticodeSignature installer/python-3.8.10.exe
-          Write-Host "Signature: $($sig.Status) - $($sig.SignerCertificate.Subject)"
-          if ($sig.Status -ne 'Valid' -or $sig.SignerCertificate.Subject -notmatch 'Python Software Foundation') {
-            throw "The Python installer is not signed by the Python Software Foundation"
+          foreach ($v in '3.8.10', '3.12.10') {
+            $file = "installer/python-$v.exe"
+            Invoke-WebRequest "https://www.python.org/ftp/python/$v/python-$v.exe" -OutFile $file
+            $sig = Get-AuthenticodeSignature $file
+            Write-Host "python-$v.exe signature: $($sig.Status) - $($sig.SignerCertificate.Subject)"
+            if ($sig.Status -ne 'Valid' -or $sig.SignerCertificate.Subject -notmatch 'Python Software Foundation') {
+              throw "python-$v.exe is not signed by the Python Software Foundation"
+            }
           }
 
       - name: Install Inno Setup
@@ -63,34 +66,11 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw "ISCC failed" }
           Get-ChildItem installer\Output
 
-      - name: Install it and check that PythonIDE starts
-        run: |
-          # Make this machine look like a lab PC without Python, so the
-          # installer has to install its bundled Python 3.8.10.
-          foreach ($key in 'HKLM:\SOFTWARE\Python\PythonCore', 'HKLM:\SOFTWARE\WOW6432Node\Python\PythonCore', 'HKCU:\SOFTWARE\Python\PythonCore') {
-            if (Test-Path $key) { Remove-Item $key -Recurse -Force; Write-Host "Hid existing Python: $key" }
-          }
-          $setup = (Get-ChildItem installer\Output\*.exe | Select-Object -First 1).FullName
-          $p = Start-Process $setup -ArgumentList '/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART','/TASKS=desktopicon','/LOG=install.log' -Wait -PassThru
-          if ($p.ExitCode -ne 0) { Get-Content install.log; throw "Installer failed with code $($p.ExitCode)" }
-          Select-String -Path install.log -Pattern 'python-3.8.10|Python' | Select-Object -First 15 | ForEach-Object { $_.Line }
+      - name: Install on a "Windows 7" PC without Python (Python 3.8 expected)
+        run: ./installer/test-install.ps1 -ExpectedPython Python38-32 -ExtraArgs '/FORCEPYTHON38=1'
 
-          $app = "${env:ProgramFiles(x86)}\PythonIDE"
-          if (-not (Test-Path "$app\start.pyw")) { throw "PythonIDE files were not installed" }
-          $lnk = (New-Object -ComObject WScript.Shell).CreateShortcut("$env:PUBLIC\Desktop\PythonIDE.lnk")
-          Write-Host "Desktop shortcut runs: $($lnk.TargetPath) $($lnk.Arguments)"
-          if (-not (Test-Path $lnk.TargetPath)) { throw "The shortcut points to a Python that does not exist" }
-          if ($lnk.TargetPath -notlike "*\Python38-32\pythonw.exe") { throw "Expected the bundled Python 3.8 to be installed and used" }
-
-          $python = Join-Path (Split-Path $lnk.TargetPath) 'python.exe'
-          & $python -c "import sys, tkinter; print('Using Python', sys.version, '- Tk', tkinter.TkVersion)"
-          if ($LASTEXITCODE -ne 0) { throw "Python or Tkinter is missing" }
-
-          $ide = Start-Process $lnk.TargetPath -ArgumentList "`"$app\start.pyw`"" -WorkingDirectory $app -PassThru
-          Start-Sleep -Seconds 10
-          if ($ide.HasExited) { throw "PythonIDE closed by itself (exit code $($ide.ExitCode))" }
-          Write-Host "PythonIDE is running."
-          Stop-Process -Id $ide.Id
+      - name: Install on a Windows 10/11 PC without Python (Python 3.12 expected)
+        run: ./installer/test-install.ps1 -ExpectedPython Python312-32
 
       - uses: actions/upload-artifact@v4
         with:

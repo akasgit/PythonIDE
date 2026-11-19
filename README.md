@@ -43,8 +43,11 @@ nothing else to install.
 The installer:
 - checks whether the computer already has **Python 3.8 or newer** with Tkinter, and
   uses it if so;
-- otherwise installs **Python 3.8.10**, which is included in the installer. It is
-  32-bit, so it runs on both 32-bit and 64-bit Windows 7, 8, 10 and 11;
+- otherwise installs a Python that is included in the installer:
+  - **Windows 10 / 11:** Python 3.12.10
+  - **Windows 7 / 8:** Python 3.8.10, the last version that runs there
+
+  Both are 32-bit, so they work on 32-bit and 64-bit Windows;
 - installs PythonIDE and adds it to the Start menu and the desktop.
 
 It needs an administrator account and **Windows 7 SP1 or newer**. On Windows 7 the

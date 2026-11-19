@@ -87,7 +87,10 @@ class CodeEditor(tk.Frame):
         t.bind("<KP_Enter>", self._on_return)
         t.bind("<Tab>", self._on_tab)
         t.bind("<Shift-Tab>", self._on_shift_tab)
-        t.bind("<ISO_Left_Tab>", self._on_shift_tab)
+        try:
+            t.bind("<ISO_Left_Tab>", self._on_shift_tab)  # Shift+Tab on Linux
+        except tk.TclError:
+            pass  # this key name does not exist on Windows
         t.bind("<BackSpace>", self._on_backspace)
         t.bind("<Control-slash>", self._toggle_comment)
         t.bind("<<TextChanged>>", self._on_modified)

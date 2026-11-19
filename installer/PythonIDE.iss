@@ -194,9 +194,16 @@ var
   Params: String;
 begin
   WizardForm.StatusLabel.Caption := 'Installing Python ' + PythonVersionName() + '. This can take a few minutes...';
-  Params := '/passive InstallAllUsers=1 PrependPath=1 Include_tcltk=1 Include_pip=1 ' +
-            'Include_launcher=1 InstallLauncherAllUsers=1 Include_test=0 Include_doc=0 ' +
-            'AssociateFiles=1 Shortcuts=1 TargetDir="' + PythonDir() + '"';
+  { /passive shows Python's progress bar; a silent setup stays fully silent.
+    The "py" launcher is left out: PythonIDE does not need it, and an
+    existing newer launcher makes the Python 3.8 installer stop and ask. }
+  if WizardSilent() then
+    Params := '/quiet'
+  else
+    Params := '/passive';
+  Params := Params + ' InstallAllUsers=1 PrependPath=1 Include_tcltk=1 Include_pip=1 ' +
+            'Include_launcher=0 Include_test=0 Include_doc=0 AssociateFiles=0 ' +
+            'Shortcuts=1 TargetDir="' + PythonDir() + '"';
   if not Exec(ExpandConstant('{tmp}\') + PythonInstallerName(), Params, '', SW_SHOW,
               ewWaitUntilTerminated, Code) then
     Code := -1;

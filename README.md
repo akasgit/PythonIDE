@@ -4,6 +4,14 @@ A simple Python editor for Class 9 and 10 students. It runs well on old school-l
 computers (3rd-gen Core i3, 2–4 GB RAM) and works offline. It needs only Python,
 nothing else to install.
 
+It comes in two versions:
+
+- **Desktop app** (this page): a Windows installer for lab computers. It works
+  offline.
+- **[PythonIDE Online](web/README.md)**: the same editor on a website, with teacher
+  and student accounts so students can save their programs and teachers can see
+  them. Python runs in each student's browser. It's made for cPanel shared hosting.
+
 ## What it does for students
 
 - **Run (F5).** Runs the program. When the program asks for input, the input box
@@ -22,10 +30,10 @@ nothing else to install.
   the slider sets the speed.
 - **Variables panel.** After a normal run it shows the final values, so students
   see what their program did.
-- **Examples menu.** 79 ready-made programs:
+- **Examples menu.** 80 ready-made programs:
   - **Basics (33):** input/output, simple interest, if/elif, loops, factorial,
     prime, Fibonacci, strings, lists, functions and turtle drawing.
-  - **Class 10 (46):** functions (QBASIC SUB/FUNCTION in Python), number programs
+  - **Class 10 (47):** functions (QBASIC SUB/FUNCTION in Python), number programs
     (Armstrong, palindrome, perfect, HCF/LCM, binary), series and patterns
     (including the NEPAL pattern), string handling, lists/tuples/dictionaries,
     bubble sort, file handling with student records, and try/except.

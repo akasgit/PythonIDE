@@ -1,0 +1,410 @@
+{
+ "welcome": "# Welcome to PythonIDE!\n#\n#   Run  (F5)  runs your program\n#   Step (F6)  runs it one line at a time so you can watch the variables\n#   Examples   menu has ready-made programs to try\n#   F9         changes the colours: Light, Dark or Projector (big, bold text)\n#\n# Lines starting with # are comments. Python ignores them.\n\nname = input(\"What is your name? \")\nprint(\"Namaste,\", name + \"!\")\n",
+ "sections": [
+  {
+   "title": null,
+   "groups": [
+    {
+     "title": "1. Getting started",
+     "items": [
+      {
+       "title": "Hello, Nepal!",
+       "code": "# print() shows something on the screen.\nprint(\"Namaste!\")\nprint(\"Hello, Nepal!\")\n\n# Text goes inside quotes. Numbers do not need quotes.\nprint(\"Height of Mount Everest:\", 8848.86, \"metres\")\n"
+      },
+      {
+       "title": "Variables",
+       "code": "# A variable is a box with a name that stores a value.\nname = \"Sita\"\nage = 15\nheight = 1.52\n\nprint(\"Name:\", name)\nprint(\"Age:\", age)\nprint(\"Height:\", height, \"m\")\n\n# A variable can change. Watch it in the Variables panel.\nage = age + 1\nprint(\"Next year\", name, \"will be\", age)\n"
+      },
+      {
+       "title": "Maths with Python",
+       "code": "a = 17\nb = 5\n\nprint(\"a + b =\", a + b)    # add\nprint(\"a - b =\", a - b)    # subtract\nprint(\"a * b =\", a * b)    # multiply\nprint(\"a / b =\", a / b)    # divide (gives a decimal)\nprint(\"a // b =\", a // b)  # whole-number division\nprint(\"a % b =\", a % b)    # remainder\nprint(\"a ** 2 =\", a ** 2)  # power (a squared)\n"
+      }
+     ]
+    },
+    {
+     "title": "2. Input and output",
+     "items": [
+      {
+       "title": "Ask your name",
+       "code": "# input() waits for you to type something and press Enter.\nname = input(\"What is your name? \")\nschool = input(\"Which school do you study in? \")\n\nprint(\"Namaste,\", name + \"!\")\nprint(\"Welcome to Python at\", school)\n"
+      },
+      {
+       "title": "Sum of two numbers",
+       "code": "# input() always gives TEXT. int() changes the text into a number.\na = int(input(\"Enter first number: \"))\nb = int(input(\"Enter second number: \"))\n\ntotal = a + b\nprint(\"Sum =\", total)\n"
+      },
+      {
+       "title": "Simple interest",
+       "code": "# Simple Interest  I = (P x T x R) / 100\np = float(input(\"Principal (Rs): \"))\nt = float(input(\"Time (years): \"))\nr = float(input(\"Rate (% per year): \"))\n\ni = (p * t * r) / 100\namount = p + i\n\nprint(\"Simple interest = Rs\", i)\nprint(\"Total amount   = Rs\", amount)\n"
+      },
+      {
+       "title": "Area of a circle",
+       "code": "import math\n\nr = float(input(\"Radius of the circle (cm): \"))\narea = math.pi * r ** 2\ncircumference = 2 * math.pi * r\n\n# round(x, 2) keeps 2 digits after the decimal point.\nprint(\"Area =\", round(area, 2), \"sq. cm\")\nprint(\"Circumference =\", round(circumference, 2), \"cm\")\n"
+      },
+      {
+       "title": "Celsius to Fahrenheit",
+       "code": "c = float(input(\"Temperature in Celsius: \"))\nf = c * 9 / 5 + 32\nprint(c, \"C =\", f, \"F\")\n"
+      }
+     ]
+    },
+    {
+     "title": "3. Decisions (if / else)",
+     "items": [
+      {
+       "title": "Even or odd",
+       "code": "n = int(input(\"Enter a number: \"))\n\n# % gives the remainder. Even numbers have remainder 0 when divided by 2.\nif n % 2 == 0:\n    print(n, \"is EVEN\")\nelse:\n    print(n, \"is ODD\")\n"
+      },
+      {
+       "title": "Positive, negative or zero",
+       "code": "n = float(input(\"Enter a number: \"))\n\nif n > 0:\n    print(\"Positive\")\nelif n < 0:\n    print(\"Negative\")\nelse:\n    print(\"Zero\")\n"
+      },
+      {
+       "title": "Greatest of three numbers",
+       "code": "a = int(input(\"First number: \"))\nb = int(input(\"Second number: \"))\nc = int(input(\"Third number: \"))\n\nif a >= b and a >= c:\n    greatest = a\nelif b >= a and b >= c:\n    greatest = b\nelse:\n    greatest = c\n\nprint(\"Greatest number is\", greatest)\n"
+      },
+      {
+       "title": "Grade from marks",
+       "code": "marks = float(input(\"Enter your marks (out of 100): \"))\n\nif marks >= 90:\n    grade = \"A+\"\nelif marks >= 80:\n    grade = \"A\"\nelif marks >= 70:\n    grade = \"B+\"\nelif marks >= 60:\n    grade = \"B\"\nelif marks >= 50:\n    grade = \"C+\"\nelif marks >= 40:\n    grade = \"C\"\nelif marks >= 35:\n    grade = \"D\"\nelse:\n    grade = \"NG (Not Graded)\"\n\nprint(\"Your grade is\", grade)\n"
+      },
+      {
+       "title": "Can you vote?",
+       "code": "age = int(input(\"Enter your age: \"))\n\nif age >= 18:\n    print(\"You can vote in Nepal.\")\nelse:\n    years_left = 18 - age\n    print(\"You can vote after\", years_left, \"years.\")\n"
+      }
+     ]
+    },
+    {
+     "title": "4. Loops (for / while)",
+     "items": [
+      {
+       "title": "Count 1 to 10",
+       "code": "# range(1, 11) gives 1, 2, 3 ... 10  (it stops BEFORE 11)\nfor i in range(1, 11):\n    print(i)\n\nprint(\"Done!\")\n"
+      },
+      {
+       "title": "Multiplication table",
+       "code": "n = int(input(\"Which table? \"))\n\nfor i in range(1, 11):\n    print(n, \"x\", i, \"=\", n * i)\n"
+      },
+      {
+       "title": "Sum of 1 to N",
+       "code": "n = int(input(\"Enter N: \"))\n\ntotal = 0\nfor i in range(1, n + 1):\n    total = total + i\n\nprint(\"Sum of 1 to\", n, \"is\", total)\n"
+      },
+      {
+       "title": "Factorial",
+       "code": "n = int(input(\"Enter a number: \"))\n\nfact = 1\nfor i in range(1, n + 1):\n    fact = fact * i\n\nprint(n, \"! =\", fact)\n"
+      },
+      {
+       "title": "Fibonacci series",
+       "code": "n = int(input(\"How many terms? \"))\n\na, b = 0, 1\nfor i in range(n):\n    print(a, end=\" \")\n    a, b = b, a + b\nprint()\n"
+      },
+      {
+       "title": "Prime or not",
+       "code": "n = int(input(\"Enter a number: \"))\n\nis_prime = n > 1\nfor i in range(2, n):\n    if n % i == 0:\n        is_prime = False\n        break\n\nif is_prime:\n    print(n, \"is a PRIME number\")\nelse:\n    print(n, \"is NOT a prime number\")\n"
+      },
+      {
+       "title": "Reverse a number (while)",
+       "code": "n = int(input(\"Enter a number: \"))\n\nreverse = 0\nwhile n > 0:\n    digit = n % 10          # last digit\n    reverse = reverse * 10 + digit\n    n = n // 10             # remove last digit\n\nprint(\"Reversed number:\", reverse)\n"
+      },
+      {
+       "title": "Sum of digits (while)",
+       "code": "n = int(input(\"Enter a number: \"))\n\ntotal = 0\nwhile n > 0:\n    total = total + n % 10\n    n = n // 10\n\nprint(\"Sum of digits:\", total)\n"
+      },
+      {
+       "title": "Guess the number",
+       "code": "import random\n\nsecret = random.randint(1, 20)\ntries = 0\nguess = 0\n\nprint(\"I am thinking of a number between 1 and 20.\")\nwhile guess != secret:\n    guess = int(input(\"Your guess: \"))\n    tries = tries + 1\n    if guess < secret:\n        print(\"Too small!\")\n    elif guess > secret:\n        print(\"Too big!\")\n\nprint(\"Correct! You got it in\", tries, \"tries.\")\n"
+      }
+     ]
+    },
+    {
+     "title": "5. Strings (text)",
+     "items": [
+      {
+       "title": "Text functions",
+       "code": "word = \"Kathmandu\"\n\nprint(word.upper())     # KATHMANDU\nprint(word.lower())     # kathmandu\nprint(len(word))        # number of letters\nprint(word[0])          # first letter (position 0)\nprint(word[-1])         # last letter\nprint(word[0:5])        # letters 0 to 4\n"
+      },
+      {
+       "title": "Count vowels",
+       "code": "text = input(\"Enter a sentence: \")\n\ncount = 0\nfor letter in text.lower():\n    if letter in \"aeiou\":\n        count = count + 1\n\nprint(\"Number of vowels:\", count)\n"
+      },
+      {
+       "title": "Palindrome",
+       "code": "word = input(\"Enter a word: \").lower()\n\nif word == word[::-1]:\n    print(word, \"is a palindrome\")\nelse:\n    print(word, \"is not a palindrome\")\n"
+      }
+     ]
+    },
+    {
+     "title": "6. Lists",
+     "items": [
+      {
+       "title": "List basics",
+       "code": "districts = [\"Kathmandu\", \"Lalitpur\", \"Bhaktapur\"]\n\nprint(districts)\nprint(\"First:\", districts[0])\nprint(\"How many:\", len(districts))\n\ndistricts.append(\"Kaski\")\nprint(\"After adding:\", districts)\n\nfor d in districts:\n    print(\"-\", d)\n"
+      },
+      {
+       "title": "Average marks",
+       "code": "marks = []\nn = int(input(\"How many subjects? \"))\n\nfor i in range(n):\n    m = float(input(\"Marks of subject \" + str(i + 1) + \": \"))\n    marks.append(m)\n\nprint(\"Marks:\", marks)\nprint(\"Total:\", sum(marks))\nprint(\"Average:\", sum(marks) / n)\nprint(\"Highest:\", max(marks))\nprint(\"Lowest:\", min(marks))\n"
+      }
+     ]
+    },
+    {
+     "title": "7. Functions",
+     "items": [
+      {
+       "title": "My first function",
+       "code": "def greet(name):\n    print(\"Namaste,\", name + \"!\")\n\ngreet(\"Ram\")\ngreet(\"Gita\")\ngreet(\"Hari\")\n"
+      },
+      {
+       "title": "Function that returns",
+       "code": "def area_of_rectangle(length, breadth):\n    return length * breadth\n\nl = float(input(\"Length: \"))\nb = float(input(\"Breadth: \"))\n\na = area_of_rectangle(l, b)\nprint(\"Area =\", a)\n"
+      },
+      {
+       "title": "Is it a leap year?",
+       "code": "def is_leap(year):\n    if year % 400 == 0:\n        return True\n    if year % 100 == 0:\n        return False\n    return year % 4 == 0\n\ny = int(input(\"Enter a year (AD): \"))\nif is_leap(y):\n    print(y, \"is a leap year\")\nelse:\n    print(y, \"is not a leap year\")\n"
+      }
+     ]
+    },
+    {
+     "title": "8. Turtle drawing",
+     "items": [
+      {
+       "title": "Draw a square",
+       "code": "import turtle\n\nt = turtle.Turtle()\nt.pensize(3)\nt.color(\"blue\")\n\nfor i in range(4):\n    t.forward(150)\n    t.left(90)\n"
+      },
+      {
+       "title": "Draw a star",
+       "code": "import turtle\n\nt = turtle.Turtle()\nt.color(\"red\")\nt.pensize(2)\nt.speed(3)\n\nfor i in range(5):\n    t.forward(200)\n    t.right(144)\n"
+      },
+      {
+       "title": "Colourful spiral",
+       "code": "import turtle\n\nt = turtle.Turtle()\nt.speed(0)\ncolours = [\"red\", \"blue\", \"green\", \"orange\", \"purple\"]\n\nfor i in range(100):\n    t.color(colours[i % 5])\n    t.forward(i * 3)\n    t.left(91)\n"
+      }
+     ]
+    }
+   ]
+  },
+  {
+   "title": "Class 10",
+   "groups": [
+    {
+     "title": "Functions (modular programming)",
+     "items": [
+      {
+       "title": "SUB and FUNCTION in Python",
+       "code": "# In QBASIC you used SUB (does a job) and FUNCTION (gives back a value).\n# In Python both are written with def.\n\n# Like a SUB: it only does a job (prints), it gives nothing back.\ndef show_line():\n    print(\"-\" * 30)\n\n# Like a FUNCTION: it gives back (returns) a value.\ndef square(n):\n    return n * n\n\nshow_line()\nprint(\"Square of 7 is\", square(7))\nshow_line()\n"
+      },
+      {
+       "title": "Simple interest (function)",
+       "code": "def simple_interest(p, t, r):\n    return p * t * r / 100\n\np = float(input(\"Principal (Rs): \"))\nt = float(input(\"Time (years): \"))\nr = float(input(\"Rate (%): \"))\n\ni = simple_interest(p, t, r)\nprint(\"Simple interest = Rs\", round(i, 2))\nprint(\"Amount = Rs\", round(p + i, 2))\n"
+      },
+      {
+       "title": "Area and volume of a cylinder",
+       "code": "import math\n\ndef curved_area(r, h):\n    return 2 * math.pi * r * h\n\ndef volume(r, h):\n    return math.pi * r * r * h\n\nr = float(input(\"Radius (cm): \"))\nh = float(input(\"Height (cm): \"))\n\nprint(\"Curved surface area =\", round(curved_area(r, h), 2), \"sq. cm\")\nprint(\"Volume =\", round(volume(r, h), 2), \"cubic cm\")\n"
+      },
+      {
+       "title": "Total and average (two return values)",
+       "code": "def total_and_average(a, b, c):\n    total = a + b + c\n    average = total / 3\n    return total, average          # a function can return two values\n\nenglish = float(input(\"Marks in English: \"))\nmaths = float(input(\"Marks in Maths: \"))\nscience = float(input(\"Marks in Science: \"))\n\nt, avg = total_and_average(english, maths, science)\nprint(\"Total =\", t)\nprint(\"Average =\", round(avg, 2))\n"
+      },
+      {
+       "title": "Default value: rupees to dollars",
+       "code": "# rate has a default value. If we don't give a rate, 133.5 is used.\ndef to_dollars(rupees, rate=133.5):\n    return rupees / rate\n\nrs = float(input(\"Amount in Nepali rupees: \"))\nprint(\"At the usual rate: $\", round(to_dollars(rs), 2))\nprint(\"At rate 135:       $\", round(to_dollars(rs, 135), 2))\n"
+      },
+      {
+       "title": "Local and global variables",
+       "code": "school = \"Shree Secondary School\"     # global: usable everywhere\n\ndef greet(name):\n    message = \"Welcome, \" + name       # local: only inside greet()\n    print(message, \"to\", school)\n\ngreet(\"Sita\")\ngreet(\"Hari\")\nprint(school)\n# print(message)   <- remove the # to see the error: message is local\n"
+      },
+      {
+       "title": "Recursion: factorial",
+       "code": "# A recursive function calls itself with a smaller value.\ndef factorial(n):\n    if n == 0:\n        return 1                    # stopping condition\n    return n * factorial(n - 1)\n\nn = int(input(\"Enter a number: \"))\nprint(n, \"! =\", factorial(n))\n"
+      }
+     ]
+    },
+    {
+     "title": "Number programs",
+     "items": [
+      {
+       "title": "Armstrong number",
+       "code": "# 153 is an Armstrong number: 1*1*1 + 5*5*5 + 3*3*3 = 153\nn = int(input(\"Enter a 3-digit number: \"))\n\ntemp = n\ntotal = 0\nwhile temp > 0:\n    digit = temp % 10\n    total = total + digit ** 3\n    temp = temp // 10\n\nif total == n:\n    print(n, \"is an Armstrong number\")\nelse:\n    print(n, \"is not an Armstrong number\")\n"
+      },
+      {
+       "title": "Palindrome number",
+       "code": "n = int(input(\"Enter a number: \"))\n\ntemp = n\nreverse = 0\nwhile temp > 0:\n    reverse = reverse * 10 + temp % 10\n    temp = temp // 10\n\nif reverse == n:\n    print(n, \"is a palindrome number\")\nelse:\n    print(n, \"is not a palindrome number\")\n"
+      },
+      {
+       "title": "Perfect number",
+       "code": "# 28 is perfect: its factors 1 + 2 + 4 + 7 + 14 = 28\nn = int(input(\"Enter a number: \"))\n\ntotal = 0\nfor i in range(1, n):\n    if n % i == 0:\n        total = total + i\n\nif total == n:\n    print(n, \"is a perfect number\")\nelse:\n    print(n, \"is not a perfect number\")\n"
+      },
+      {
+       "title": "Prime numbers from 1 to 100",
+       "code": "print(\"Prime numbers from 1 to 100:\")\nfor n in range(2, 101):\n    is_prime = True\n    for i in range(2, n):\n        if n % i == 0:\n            is_prime = False\n            break\n    if is_prime:\n        print(n, end=\" \")\nprint()\n"
+      },
+      {
+       "title": "HCF and LCM",
+       "code": "a = int(input(\"First number: \"))\nb = int(input(\"Second number: \"))\n\nx, y = a, b\nwhile y != 0:\n    x, y = y, x % y          # Euclid's method\nhcf = x\nlcm = a * b // hcf\n\nprint(\"HCF =\", hcf)\nprint(\"LCM =\", lcm)\n"
+      },
+      {
+       "title": "Decimal to binary",
+       "code": "n = int(input(\"Enter a decimal number: \"))\n\nif n == 0:\n    binary = \"0\"\nelse:\n    binary = \"\"\n    temp = n\n    while temp > 0:\n        binary = str(temp % 2) + binary\n        temp = temp // 2\n\nprint(\"Binary of\", n, \"is\", binary)\n"
+      },
+      {
+       "title": "Binary to decimal",
+       "code": "binary = input(\"Enter a binary number (only 0 and 1): \")\n\ndecimal = 0\nfor digit in binary:\n    decimal = decimal * 2 + int(digit)\n\nprint(\"Decimal value is\", decimal)\n"
+      },
+      {
+       "title": "Multiplication tables 1 to 10",
+       "code": "# A loop inside a loop (nested loop)\nfor row in range(1, 11):\n    for col in range(1, 11):\n        print(str(row * col).rjust(4), end=\"\")\n    print()\n"
+      }
+     ]
+    },
+    {
+     "title": "Series and patterns",
+     "items": [
+      {
+       "title": "1, 4, 9, 16 ... (squares)",
+       "code": "n = int(input(\"How many terms? \"))\nfor i in range(1, n + 1):\n    print(i * i, end=\" \")\nprint()\n"
+      },
+      {
+       "title": "2, 4, 8, 16 ... (doubling)",
+       "code": "n = int(input(\"How many terms? \"))\nterm = 2\nfor i in range(n):\n    print(term, end=\" \")\n    term = term * 2\nprint()\n"
+      },
+      {
+       "title": "1, 2, 4, 7, 11 ...",
+       "code": "# The gap grows by one each time: +1, +2, +3, +4 ...\nn = int(input(\"How many terms? \"))\nterm = 1\nfor gap in range(1, n + 1):\n    print(term, end=\" \")\n    term = term + gap\nprint()\n"
+      },
+      {
+       "title": "5, 55, 555, 5555 ...",
+       "code": "n = int(input(\"How many terms? \"))\nterm = 0\nfor i in range(n):\n    term = term * 10 + 5\n    print(term, end=\" \")\nprint()\n"
+      },
+      {
+       "title": "100, 95, 90 ... 5",
+       "code": "for n in range(100, 4, -5):\n    print(n, end=\" \")\nprint()\n"
+      },
+      {
+       "title": "Sum of 1 + 1/2 + 1/3 ... + 1/n",
+       "code": "n = int(input(\"Enter n: \"))\ntotal = 0\nfor i in range(1, n + 1):\n    total = total + 1 / i\nprint(\"Sum =\", round(total, 4))\n"
+      },
+      {
+       "title": "Star triangle",
+       "code": "rows = int(input(\"How many rows? \"))\nfor i in range(1, rows + 1):\n    print(\"*\" * i)\n"
+      },
+      {
+       "title": "Number triangle",
+       "code": "# 1\n# 1 2\n# 1 2 3\nrows = int(input(\"How many rows? \"))\nfor i in range(1, rows + 1):\n    for j in range(1, i + 1):\n        print(j, end=\" \")\n    print()\n"
+      },
+      {
+       "title": "Star pyramid",
+       "code": "rows = int(input(\"How many rows? \"))\nfor i in range(1, rows + 1):\n    spaces = \" \" * (rows - i)\n    stars = \"*\" * (2 * i - 1)\n    print(spaces + stars)\n"
+      },
+      {
+       "title": "NEPAL word pattern",
+       "code": "word = \"NEPAL\"\n\n# N, NE, NEP, NEPA, NEPAL\nfor i in range(1, len(word) + 1):\n    print(word[:i])\n\nprint()\n\n# NEPAL, NEPA, NEP, NE, N\nfor i in range(len(word), 0, -1):\n    print(word[:i])\n"
+      }
+     ]
+    },
+    {
+     "title": "String handling",
+     "items": [
+      {
+       "title": "Vowels and consonants",
+       "code": "text = input(\"Enter a sentence: \")\n\nvowels = 0\nconsonants = 0\nfor ch in text.lower():\n    if ch in \"aeiou\":\n        vowels = vowels + 1\n    elif ch.isalpha():\n        consonants = consonants + 1\n\nprint(\"Vowels:\", vowels)\nprint(\"Consonants:\", consonants)\n"
+      },
+      {
+       "title": "Count words",
+       "code": "sentence = input(\"Enter a sentence: \")\nwords = sentence.split()      # split at spaces into a list of words\n\nprint(\"Number of words:\", len(words))\nfor w in words:\n    print(w)\n"
+      },
+      {
+       "title": "Capital and small letters",
+       "code": "text = input(\"Enter some text: \")\n\ncapital = 0\nsmall = 0\nfor ch in text:\n    if ch.isupper():\n        capital = capital + 1\n    elif ch.islower():\n        small = small + 1\n\nprint(\"Capital letters:\", capital)\nprint(\"Small letters:\", small)\nprint(\"All capital:\", text.upper())\nprint(\"All small:\", text.lower())\n"
+      },
+      {
+       "title": "Reverse a sentence",
+       "code": "sentence = input(\"Enter a sentence: \")\n\nprint(\"Letters reversed:\", sentence[::-1])\n\nwords = sentence.split()\nwords.reverse()\nprint(\"Words reversed:  \", \" \".join(words))\n"
+      },
+      {
+       "title": "Initials of a name",
+       "code": "# Ram Bahadur Thapa  ->  R. B. Thapa\nname = input(\"Enter your full name: \").title()\nparts = name.split()\n\nshort = \"\"\nfor part in parts[:-1]:\n    short = short + part[0] + \". \"\nshort = short + parts[-1]\n\nprint(short)\n"
+      },
+      {
+       "title": "How often each letter appears",
+       "code": "text = input(\"Enter a word: \").lower()\n\ncount = {}                       # a dictionary: letter -> how many\nfor ch in text:\n    if ch.isalpha():\n        count[ch] = count.get(ch, 0) + 1\n\nfor letter in sorted(count):\n    print(letter, \":\", count[letter])\n"
+      }
+     ]
+    },
+    {
+     "title": "Lists, tuples and dictionaries",
+     "items": [
+      {
+       "title": "Largest and smallest (without max)",
+       "code": "numbers = []\nn = int(input(\"How many numbers? \"))\nfor i in range(n):\n    numbers.append(int(input(\"Number \" + str(i + 1) + \": \")))\n\nlargest = numbers[0]\nsmallest = numbers[0]\nfor x in numbers:\n    if x > largest:\n        largest = x\n    if x < smallest:\n        smallest = x\n\nprint(\"Largest:\", largest)\nprint(\"Smallest:\", smallest)\n"
+      },
+      {
+       "title": "Search in a list",
+       "code": "districts = [\"Kathmandu\", \"Lalitpur\", \"Bhaktapur\", \"Kaski\", \"Chitwan\", \"Jhapa\"]\n\nname = input(\"Enter a district to search: \").title()\n\nfound = False\nfor position in range(len(districts)):\n    if districts[position] == name:\n        print(name, \"found at position\", position)\n        found = True\n\nif not found:\n    print(name, \"is not in the list\")\n"
+      },
+      {
+       "title": "Bubble sort",
+       "code": "marks = [67, 45, 89, 32, 78, 55]\nprint(\"Before:\", marks)\n\nn = len(marks)\nfor i in range(n - 1):\n    for j in range(n - 1 - i):\n        if marks[j] > marks[j + 1]:\n            marks[j], marks[j + 1] = marks[j + 1], marks[j]   # swap\n\nprint(\"After: \", marks)\n# Python can also do it in one line: sorted(marks)\n"
+      },
+      {
+       "title": "Remove repeated items",
+       "code": "numbers = [4, 7, 4, 2, 7, 9, 2, 4]\n\nunique = []\nfor x in numbers:\n    if x not in unique:\n        unique.append(x)\n\nprint(\"Original:\", numbers)\nprint(\"Without repeats:\", unique)\n"
+      },
+      {
+       "title": "Tuple: days of the week",
+       "code": "# A tuple is like a list, but it cannot be changed.\ndays = (\"Sunday\", \"Monday\", \"Tuesday\", \"Wednesday\",\n        \"Thursday\", \"Friday\", \"Saturday\")\n\nn = int(input(\"Enter day number (1-7): \"))\nif 1 <= n <= 7:\n    print(\"Day\", n, \"is\", days[n - 1])\nelse:\n    print(\"Please enter a number from 1 to 7\")\n"
+      },
+      {
+       "title": "Dictionary: find the topper",
+       "code": "marks = {\"Sita\": 87, \"Ram\": 74, \"Gita\": 92, \"Hari\": 68}\n\nfor name in marks:\n    print(name, \"got\", marks[name])\n\ntopper = max(marks, key=marks.get)\nprint(\"Topper:\", topper, \"with\", marks[topper], \"marks\")\n"
+      },
+      {
+       "title": "Dictionary: phone book",
+       "code": "phone = {}\n\nn = int(input(\"How many contacts? \"))\nfor i in range(n):\n    name = input(\"Name: \").title()\n    number = input(\"Phone number: \")\n    phone[name] = number\n\nsearch = input(\"Whose number do you want? \").title()\nif search in phone:\n    print(search, \":\", phone[search])\nelse:\n    print(search, \"is not in the phone book\")\n"
+      }
+     ]
+    },
+    {
+     "title": "File handling (student records)",
+     "items": [
+      {
+       "title": "1. Write records to a file",
+       "code": "# Saves student records in students.txt, one student per line:\n#   name,class,english,maths,science\n# Save your program first so you know which folder the file goes into.\n\nf = open(\"students.txt\", \"w\")      # \"w\" = write (starts a new file)\n\nn = int(input(\"How many students? \"))\nfor i in range(n):\n    print(\"Student\", i + 1)\n    name = input(\"  Name: \")\n    grade = input(\"  Class: \")\n    english = input(\"  English marks: \")\n    maths = input(\"  Maths marks: \")\n    science = input(\"  Science marks: \")\n    f.write(name + \",\" + grade + \",\" + english + \",\" + maths + \",\" + science + \"\\n\")\n\nf.close()\nprint(\"Saved\", n, \"records in students.txt\")\n"
+      },
+      {
+       "title": "2. Read and show all records",
+       "code": "# Run \"1. Write records to a file\" first.\nf = open(\"students.txt\", \"r\")      # \"r\" = read\n\nprint(\"Name\".ljust(12), \"Class\", \"Eng\", \"Maths\", \"Sci\", \"Total\", sep=\"\\t\")\nfor line in f:\n    name, grade, eng, maths, sci = line.strip().split(\",\")\n    total = int(eng) + int(maths) + int(sci)\n    print(name.ljust(12), grade, eng, maths, sci, total, sep=\"\\t\")\n\nf.close()\n"
+      },
+      {
+       "title": "3. Add more records",
+       "code": "f = open(\"students.txt\", \"a\")      # \"a\" = append (adds to the end)\n\nname = input(\"Name: \")\ngrade = input(\"Class: \")\nenglish = input(\"English marks: \")\nmaths = input(\"Maths marks: \")\nscience = input(\"Science marks: \")\nf.write(name + \",\" + grade + \",\" + english + \",\" + maths + \",\" + science + \"\\n\")\n\nf.close()\nprint(\"Record added.\")\n"
+      },
+      {
+       "title": "4. Show students who passed",
+       "code": "# Pass = 35 or more in every subject.\nf = open(\"students.txt\", \"r\")\n\nprint(\"Students who passed:\")\nfor line in f:\n    name, grade, eng, maths, sci = line.strip().split(\",\")\n    if int(eng) >= 35 and int(maths) >= 35 and int(sci) >= 35:\n        print(\" -\", name)\n\nf.close()\n"
+      },
+      {
+       "title": "5. Search a student",
+       "code": "search = input(\"Enter the name to search: \").lower()\n\nfound = False\nwith open(\"students.txt\", \"r\") as f:   # \"with\" closes the file for you\n    for line in f:\n        name, grade, eng, maths, sci = line.strip().split(\",\")\n        if name.lower() == search:\n            print(\"Found:\", name, \"| Class\", grade, \"| Marks:\", eng, maths, sci)\n            found = True\n\nif not found:\n    print(\"No student called\", search)\n"
+      },
+      {
+       "title": "6. Count records",
+       "code": "count = 0\nwith open(\"students.txt\", \"r\") as f:\n    for line in f:\n        if line.strip() != \"\":\n            count = count + 1\n\nprint(\"There are\", count, \"records in students.txt\")\n"
+      }
+     ]
+    },
+    {
+     "title": "Handling errors (try / except)",
+     "items": [
+      {
+       "title": "Ask again until a number is typed",
+       "code": "while True:\n    try:\n        age = int(input(\"Enter your age: \"))\n        break                         # it worked, leave the loop\n    except ValueError:\n        print(\"That is not a whole number. Please try again.\")\n\nprint(\"Next year you will be\", age + 1)\n"
+      },
+      {
+       "title": "Safe division",
+       "code": "try:\n    a = float(input(\"First number: \"))\n    b = float(input(\"Second number: \"))\n    print(\"Answer:\", a / b)\nexcept ValueError:\n    print(\"Please type numbers only.\")\nexcept ZeroDivisionError:\n    print(\"You cannot divide by zero.\")\nfinally:\n    print(\"Thank you!\")              # finally runs every time\n"
+      },
+      {
+       "title": "File that may not exist",
+       "code": "try:\n    f = open(\"students.txt\", \"r\")\n    print(f.read())\n    f.close()\nexcept FileNotFoundError:\n    print(\"students.txt does not exist yet.\")\n    print(\"Run the example 'Write records to a file' first.\")\n"
+      }
+     ]
+    }
+   ]
+  }
+ ]
+}

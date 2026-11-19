@@ -1,4 +1,4 @@
-name: Test and build installer
+name: Test and build
 
 on:
   push:
@@ -95,3 +95,82 @@ jobs:
         uses: softprops/action-gh-release@v2
         with:
           files: installer/Output/*.exe
+
+  web:
+    name: Website (tests, browser test, upload zip)
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        working-directory: web
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with:
+          php-version: "8.2"   # the oldest PHP the site supports
+          extensions: mbstring, pdo_sqlite, pdo_mysql, intl
+          tools: composer
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Website uses the desktop app's error help and examples
+        run: python3 ../tools/export_web_assets.py --check
+
+      - name: PHP tests
+        run: |
+          composer install --no-interaction --prefer-dist --no-progress
+          cp .env.example .env
+          php artisan key:generate
+          php artisan test
+
+      - name: Download Python for the browser (Pyodide)
+        run: ../tools/fetch-pyodide.sh
+
+      - name: Browser test (Chromium)
+        run: |
+          sed -i 's/^DB_CONNECTION=.*/DB_CONNECTION=sqlite/; s#^DB_DATABASE=.*#DB_DATABASE='"$PWD"'/database/e2e.sqlite#; s#^APP_URL=.*#APP_URL=http://127.0.0.1:8000#' .env
+          touch database/e2e.sqlite
+          php artisan migrate --force
+          php artisan tinker --execute '
+            $t = App\Models\User::create(["name"=>"Teacher","username"=>"teacher","password"=>"secret123","role"=>"teacher","is_admin"=>true]);
+            $c = $t->classrooms()->create(["name"=>"Class 10 A"]);
+            App\Models\User::create(["name"=>"Sita Sharma","username"=>"sita","password"=>"mango42","role"=>"student","classroom_id"=>$c->id]);'
+          echo installed > storage/app/installed.lock
+          php artisan serve --host=127.0.0.1 --port=8000 > /tmp/serve.log 2>&1 &
+          mkdir -p /tmp/e2e && cd /tmp/e2e && npm init -y > /dev/null && npm install --silent playwright@1.49.1
+          npx playwright install --with-deps chromium > /dev/null
+          SHOTS=/tmp/e2e NODE_PATH=/tmp/e2e/node_modules node "$GITHUB_WORKSPACE/web/tests/e2e/ide.e2e.js"
+
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: website-screenshots
+          path: /tmp/e2e/*.png
+          if-no-files-found: ignore
+
+      - name: Build the upload zip for cPanel
+        run: |
+          if [[ "$GITHUB_REF" == refs/tags/v* ]]; then v="${GITHUB_REF_NAME#v}"; else v="1.0.0-dev.$GITHUB_RUN_NUMBER"; fi
+          composer install --no-dev --optimize-autoloader --no-interaction --no-progress
+          stage=/tmp/stage/pythonide-web
+          mkdir -p "$stage"
+          rsync -a ./ "$stage/" \
+            --exclude '.env' --exclude '.git*' --exclude 'node_modules' --exclude 'tests' \
+            --exclude 'database/*.sqlite' --exclude 'phpunit.xml' --exclude 'package.json' \
+            --exclude 'vite.config.js' --exclude 'resources/css' --exclude 'resources/js' \
+            --exclude 'storage/logs/*.log' --exclude 'storage/app/installed.lock' \
+            --exclude 'storage/app/migrations.stamp' --exclude 'storage/framework/sessions/*' \
+            --exclude 'storage/framework/views/*.php' --exclude 'storage/framework/cache/data/*'
+          cd /tmp/stage && zip -qr "$GITHUB_WORKSPACE/PythonIDE-Web-$v.zip" pythonide-web
+          ls -la "$GITHUB_WORKSPACE"/PythonIDE-Web-*.zip
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: PythonIDE-Web
+          path: PythonIDE-Web-*.zip
+
+      - name: Attach the website zip to the release
+        if: github.event_name == 'release'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: PythonIDE-Web-*.zip

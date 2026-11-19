@@ -10,16 +10,19 @@ param(
 $ErrorActionPreference = 'Stop'
 
 if ($UninstallFirst) {
-    $roots = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall', 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall'
+    $roots = 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall', 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall', 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall'
     foreach ($entry in Get-ChildItem $roots -ErrorAction SilentlyContinue | Get-ItemProperty) {
         if ($entry.DisplayName -notlike $UninstallFirst) { continue }
         Write-Host "Uninstalling $($entry.DisplayName)"
         if ($entry.BundleCachePath) {
             Start-Process $entry.BundleCachePath -ArgumentList '/uninstall', '/quiet' -Wait
         } elseif ($entry.PSChildName -match '^\{[0-9A-Fa-f-]+\}$') {
-            Start-Process msiexec.exe -ArgumentList '/x', $entry.PSChildName, '/qn', '/norestart' -Wait
+            $u = Start-Process msiexec.exe -ArgumentList '/x', $entry.PSChildName, '/qn', '/norestart' -Wait -PassThru
+            Write-Host "  msiexec exit code: $($u.ExitCode)"
         }
     }
+    $left = Get-ChildItem $roots -ErrorAction SilentlyContinue | Get-ItemProperty | Where-Object { $_.DisplayName -like $UninstallFirst }
+    foreach ($l in $left) { Write-Host "STILL INSTALLED: $($l.DisplayName) $($l.PSChildName)" }
 }
 
 # Hide every registered Python so the installer must install its own.

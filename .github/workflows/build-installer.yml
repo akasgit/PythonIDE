@@ -70,9 +70,9 @@ jobs:
         timeout-minutes: 15
         run: ./installer/test-install.ps1 -ExpectedPython Python38-32 -ExtraArgs '/FORCEPYTHON38=1'
 
-      - name: Install on a Windows 10/11 PC without Python (Python 3.12 expected)
+      - name: Install on a Windows 10/11 PC without Python (Python 3.12 chosen)
         timeout-minutes: 15
-        run: ./installer/test-install.ps1 -ExpectedPython Python312-32 -UninstallFirst 'Python 3.12.* (32-bit)'
+        run: ./installer/test-install.ps1 -ExpectedPython Python312-32 -PythonPreinstalledOnRunner
 
       - name: Show install logs
         if: failure()

@@ -3,32 +3,14 @@
 param(
     [Parameter(Mandatory = $true)][string]$ExpectedPython,  # e.g. Python38-32
     [string]$ExtraArgs = '',
-    # Fully uninstall Pythons matching this name first (e.g. "Python 3.12.* (32-bit)"),
-    # because GitHub's machines come with some Python versions installed.
-    [string]$UninstallFirst = ''
+    # GitHub's machines come with Python 3.12.10 (32-bit) partly installed, and it
+    # cannot be fully removed. Python's installer then only "repairs" that copy, so
+    # a fresh install cannot be checked there. With this switch the test checks
+    # that the right Python installer was chosen and finished successfully, and
+    # skips the checks that need a fresh install.
+    [switch]$PythonPreinstalledOnRunner
 )
 $ErrorActionPreference = 'Stop'
-
-if ($UninstallFirst) {
-    $roots = 'HKCU:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall', 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall', 'HKLM:\SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall'
-    foreach ($entry in Get-ChildItem $roots -ErrorAction SilentlyContinue | Get-ItemProperty) {
-        if ($entry.DisplayName -notlike $UninstallFirst) { continue }
-        Write-Host "Uninstalling $($entry.DisplayName)"
-        if ($entry.BundleCachePath) {
-            Start-Process $entry.BundleCachePath -ArgumentList '/uninstall', '/quiet' -Wait
-        } elseif ($entry.PSChildName -match '^\{[0-9A-Fa-f-]+\}$') {
-            # 1601/1618: Windows Installer is busy with the previous uninstall; wait and retry.
-            for ($try = 1; $try -le 6; $try++) {
-                $u = Start-Process msiexec.exe -ArgumentList '/x', $entry.PSChildName, '/qn', '/norestart' -Wait -PassThru
-                Write-Host "  msiexec exit code: $($u.ExitCode)"
-                if ($u.ExitCode -notin 1601, 1618) { break }
-                Start-Sleep -Seconds 10
-            }
-        }
-    }
-    $left = Get-ChildItem $roots -ErrorAction SilentlyContinue | Get-ItemProperty | Where-Object { $_.DisplayName -like $UninstallFirst }
-    foreach ($l in $left) { Write-Host "STILL INSTALLED: $($l.DisplayName) $($l.PSChildName)" }
-}
 
 # Hide every registered Python so the installer must install its own.
 foreach ($key in 'HKLM:\SOFTWARE\Python\PythonCore', 'HKLM:\SOFTWARE\WOW6432Node\Python\PythonCore', 'HKCU:\SOFTWARE\Python\PythonCore') {
@@ -43,6 +25,21 @@ $p = Start-Process $setup -ArgumentList $arguments -Wait -PassThru
 if ($p.ExitCode -ne 0) { Get-Content $log; throw "Installer failed with code $($p.ExitCode)" }
 
 $app = "${env:ProgramFiles(x86)}\PythonIDE"
+
+if ($PythonPreinstalledOnRunner) {
+    if (-not (Test-Path "$app\start.pyw")) { throw "PythonIDE files were not installed" }
+    $installer = "python-" + ($ExpectedPython -replace 'Python3(\d+)-32', '3.$1') + ".10.exe"
+    if (-not (Select-String -Path $log -Pattern ([regex]::Escape($installer)) -Quiet)) {
+        throw "The installer did not choose $installer"
+    }
+    $pyLog = Get-ChildItem $env:TEMP -Filter 'Python *.log' | Where-Object { $_.Name -notmatch '_\d+_' } |
+        Sort-Object LastWriteTime | Select-Object -Last 1
+    if (-not (Select-String -Path $pyLog.FullName -Pattern 'Exit code: 0x0' -Quiet)) {
+        throw "Python's installer did not finish successfully ($($pyLog.Name))"
+    }
+    Write-Host "OK: $installer was chosen and Python's installer finished successfully."
+    exit 0
+}
 if (-not (Test-Path "$app\start.pyw")) { throw "PythonIDE files were not installed" }
 
 $lnk = (New-Object -ComObject WScript.Shell).CreateShortcut("$env:PUBLIC\Desktop\PythonIDE.lnk")

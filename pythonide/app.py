@@ -158,7 +158,11 @@ class App:
         m.add_command(label="Run to the end", accelerator="F8", command=self.step_to_end)
         menubar.add_cascade(label="Run", menu=m)
 
-        self.examples_menu = tk.Menu(menubar, tearoff=False, font=f, postcommand=self._fill_examples_menu)
+        # The menu bar and the toolbar button each get their own menu: on
+        # Windows one menu cannot be shown in both places.
+        self.examples_menu = tk.Menu(menubar, tearoff=False, font=f)
+        self.examples_menu.configure(postcommand=lambda: self._fill_examples_menu(self.examples_menu))
+        self._fill_examples_menu(self.examples_menu)
         menubar.add_cascade(label="Examples", menu=self.examples_menu)
 
         m = tk.Menu(menubar, tearoff=False, font=f)
@@ -186,8 +190,8 @@ class App:
 
         self.root.config(menu=menubar)
 
-    def _fill_examples_menu(self):
-        menu = self.examples_menu
+    def _fill_examples_menu(self, menu):
+        """Put all examples into ``menu``. Teacher examples are re-read each time."""
         menu.delete(0, "end")
         for group, items in examples.EXAMPLES:
             sub = tk.Menu(menu, tearoff=False, font=self.ui_font)
@@ -253,7 +257,12 @@ class App:
         button("Open", self.open_file)
         button("Save", self.save)
         mb = tk.Menubutton(bar, text="Examples \u25be", font=self.ui_font, relief="flat",
-                           padx=10, pady=4, cursor="hand2", menu=self.examples_menu)
+                           padx=10, pady=4, cursor="hand2")
+        self.toolbar_examples_menu = tk.Menu(mb, tearoff=False, font=self.ui_font)
+        self.toolbar_examples_menu.configure(
+            postcommand=lambda: self._fill_examples_menu(self.toolbar_examples_menu))
+        self._fill_examples_menu(self.toolbar_examples_menu)
+        mb.configure(menu=self.toolbar_examples_menu)
         self._paint(mb, bg="button", fg="text", activebackground="button_active", activeforeground="text")
         mb.pack(side="left", padx=3)
         gap()

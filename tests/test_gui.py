@@ -97,12 +97,15 @@ class AppTest(unittest.TestCase):
             for title, code in items:
                 compile(code, title, "exec")
 
-    def test_examples_menu(self):
-        self.app._fill_examples_menu()
-        menu = self.app.examples_menu
-        labels = [menu.entrycget(i, "label") for i in range(menu.index("end") + 1)
-                  if menu.type(i) == "cascade"]
-        self.assertIn("Class 10", labels)
+    def test_examples_menus_are_filled(self):
+        # Both the menu bar and the toolbar button must list the examples
+        # as soon as the app starts (the toolbar one was empty on Windows).
+        for menu in (self.app.examples_menu, self.app.toolbar_examples_menu):
+            labels = [menu.entrycget(i, "label") for i in range(menu.index("end") + 1)
+                      if menu.type(i) == "cascade"]
+            self.assertIn("1. Getting started", labels)
+            self.assertIn("Class 10", labels)
+        self.assertIsNot(self.app.examples_menu, self.app.toolbar_examples_menu)
 
 
 if __name__ == "__main__":

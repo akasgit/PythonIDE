@@ -17,8 +17,13 @@ if ($UninstallFirst) {
         if ($entry.BundleCachePath) {
             Start-Process $entry.BundleCachePath -ArgumentList '/uninstall', '/quiet' -Wait
         } elseif ($entry.PSChildName -match '^\{[0-9A-Fa-f-]+\}$') {
-            $u = Start-Process msiexec.exe -ArgumentList '/x', $entry.PSChildName, '/qn', '/norestart' -Wait -PassThru
-            Write-Host "  msiexec exit code: $($u.ExitCode)"
+            # 1601/1618: Windows Installer is busy with the previous uninstall; wait and retry.
+            for ($try = 1; $try -le 6; $try++) {
+                $u = Start-Process msiexec.exe -ArgumentList '/x', $entry.PSChildName, '/qn', '/norestart' -Wait -PassThru
+                Write-Host "  msiexec exit code: $($u.ExitCode)"
+                if ($u.ExitCode -notin 1601, 1618) { break }
+                Start-Sleep -Seconds 10
+            }
         }
     }
     $left = Get-ChildItem $roots -ErrorAction SilentlyContinue | Get-ItemProperty | Where-Object { $_.DisplayName -like $UninstallFirst }

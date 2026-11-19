@@ -156,6 +156,11 @@ class CodeEditor(tk.Frame):
 
     # -- syntax colours -------------------------------------------------------
 
+    def cancel_jobs(self):
+        if self._highlight_job is not None:
+            self.after_cancel(self._highlight_job)
+            self._highlight_job = None
+
     def schedule_highlight(self):
         if self._highlight_job is not None:
             self.after_cancel(self._highlight_job)

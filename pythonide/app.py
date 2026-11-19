@@ -66,6 +66,12 @@ class App:
         root.geometry(self.settings["geometry"])
         root.minsize(760, 480)
         root.report_callback_exception = self._report_bug
+        icon = os.path.join(os.path.dirname(os.path.abspath(__file__)), "icon.ico")
+        if sys.platform == "win32" and os.path.exists(icon):
+            try:
+                root.iconbitmap(default=icon)
+            except tk.TclError:
+                pass
         if sys.platform == "win32":
             try:
                 root.state("zoomed")
@@ -106,7 +112,7 @@ class App:
         self._set_mode("idle")
         self.status("Ready. Press Run (F5) to run your program.")
         root.protocol("WM_DELETE_WINDOW", self.quit)
-        root.after(40, self._poll)
+        self._poll_job = root.after(40, self._poll)
 
     # ======================================================================
     # Building the window
@@ -489,6 +495,15 @@ class App:
         self.settings["geometry"] = self.root.geometry() if self.root.state() == "normal" else \
             self.settings["geometry"]
         self._save_settings()
+        self.close()
+
+    def close(self):
+        """Stop timers and the running program, then close the window."""
+        if self.runner is not None:
+            self.runner.stop()
+        self._cancel_auto()
+        self.root.after_cancel(self._poll_job)
+        self.editor.cancel_jobs()
         self.root.destroy()
 
     # ======================================================================
@@ -649,7 +664,7 @@ class App:
                     if self.runner is None:
                         break
         finally:
-            self.root.after(40, self._poll)
+            self._poll_job = self.root.after(40, self._poll)
 
     def _handle(self, event):
         kind = event[0]

@@ -1,0 +1,98 @@
+name: Test and build installer
+
+on:
+  push:
+    branches: ["**"]
+    tags: ["v*"]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write  # to attach the installer to a release
+
+jobs:
+  test:
+    name: Tests (Windows, Python ${{ matrix.python }} ${{ matrix.arch }})
+    runs-on: windows-2022
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - python: "3.8"   # what school labs get from the installer
+            arch: x86
+          - python: "3.12"
+            arch: x64
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python }}
+          architecture: ${{ matrix.arch }}
+      - run: python -m unittest discover -s tests -v
+
+  installer:
+    name: Build and test installer
+    needs: test
+    runs-on: windows-2022
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download Python 3.8.10 installer
+        run: |
+          Invoke-WebRequest https://www.python.org/ftp/python/3.8.10/python-3.8.10.exe -OutFile installer/python-3.8.10.exe
+          $sig = Get-AuthenticodeSignature installer/python-3.8.10.exe
+          Write-Host "Signature: $($sig.Status) - $($sig.SignerCertificate.Subject)"
+          if ($sig.Status -ne 'Valid' -or $sig.SignerCertificate.Subject -notmatch 'Python Software Foundation') {
+            throw "The Python installer is not signed by the Python Software Foundation"
+          }
+
+      - name: Install Inno Setup
+        run: |
+          if (-not (Test-Path "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe")) {
+            choco install innosetup -y --no-progress
+          }
+
+      - name: Build installer
+        run: |
+          if ($env:GITHUB_REF -like 'refs/tags/v*') { $v = $env:GITHUB_REF_NAME.Substring(1) }
+          else { $v = "1.0.0-dev.$env:GITHUB_RUN_NUMBER" }
+          & "${env:ProgramFiles(x86)}\Inno Setup 6\ISCC.exe" "/DAppVersion=$v" installer\PythonIDE.iss
+          if ($LASTEXITCODE -ne 0) { throw "ISCC failed" }
+          Get-ChildItem installer\Output
+
+      - name: Install it and check that PythonIDE starts
+        run: |
+          $setup = (Get-ChildItem installer\Output\*.exe | Select-Object -First 1).FullName
+          $p = Start-Process $setup -ArgumentList '/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART','/TASKS=desktopicon','/LOG=install.log' -Wait -PassThru
+          if ($p.ExitCode -ne 0) { Get-Content install.log; throw "Installer failed with code $($p.ExitCode)" }
+          Select-String -Path install.log -Pattern 'python-3.8.10|Python' | Select-Object -First 15 | ForEach-Object { $_.Line }
+
+          $app = "${env:ProgramFiles(x86)}\PythonIDE"
+          if (-not (Test-Path "$app\start.pyw")) { throw "PythonIDE files were not installed" }
+          $lnk = (New-Object -ComObject WScript.Shell).CreateShortcut("$env:PUBLIC\Desktop\PythonIDE.lnk")
+          Write-Host "Desktop shortcut runs: $($lnk.TargetPath) $($lnk.Arguments)"
+          if (-not (Test-Path $lnk.TargetPath)) { throw "The shortcut points to a Python that does not exist" }
+
+          $python = Join-Path (Split-Path $lnk.TargetPath) 'python.exe'
+          & $python -c "import sys, tkinter; print('Using Python', sys.version, '- Tk', tkinter.TkVersion)"
+          if ($LASTEXITCODE -ne 0) { throw "Python or Tkinter is missing" }
+
+          $ide = Start-Process $lnk.TargetPath -ArgumentList "`"$app\start.pyw`"" -WorkingDirectory $app -PassThru
+          Start-Sleep -Seconds 10
+          if ($ide.HasExited) { throw "PythonIDE closed by itself (exit code $($ide.ExitCode))" }
+          Write-Host "PythonIDE is running."
+          Stop-Process -Id $ide.Id
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: PythonIDE-Setup
+          path: installer/Output/*.exe
+
+      - name: Attach installer to the release
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: installer/Output/*.exe

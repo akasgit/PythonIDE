@@ -139,7 +139,7 @@ jobs:
           php artisan serve --host=127.0.0.1 --port=8000 > /tmp/serve.log 2>&1 &
           mkdir -p /tmp/e2e && cd /tmp/e2e && npm init -y > /dev/null && npm install --silent playwright@1.49.1
           npx playwright install --with-deps chromium > /dev/null
-          SHOTS=/tmp/e2e NODE_PATH=/tmp/e2e/node_modules node "$GITHUB_WORKSPACE/web/tests/e2e/ide.e2e.js"
+          SHOTS=/tmp/e2e NODE_PATH=/tmp/e2e/node_modules node "$GITHUB_WORKSPACE/web/tests/e2e/ide.e2e.cjs"
 
       - uses: actions/upload-artifact@v4
         if: always()

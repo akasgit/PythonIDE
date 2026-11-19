@@ -2,7 +2,7 @@
  * Browser test of the online IDE (run by GitHub Actions).
  *   1. php artisan serve, with a teacher "teacher"/"secret123", a class
  *      "Class 10 A" and a student "sita"/"mango42" (see the workflow)
- *   2. node tests/e2e/ide.e2e.js
+ *   2. node tests/e2e/ide.e2e.cjs
  */
 const { chromium } = require('playwright');
 const SHOTS = process.env.SHOTS || __dirname;

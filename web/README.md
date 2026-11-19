@@ -126,5 +126,5 @@ Tests:
 php artisan test
 ```
 
-The browser test in `tests/e2e/ide.e2e.js` runs in GitHub Actions; see
+The browser test in `tests/e2e/ide.e2e.cjs` runs in GitHub Actions; see
 `.github/workflows/build-installer.yml`.

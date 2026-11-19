@@ -65,6 +65,11 @@ jobs:
 
       - name: Install it and check that PythonIDE starts
         run: |
+          # Make this machine look like a lab PC without Python, so the
+          # installer has to install its bundled Python 3.8.10.
+          foreach ($key in 'HKLM:\SOFTWARE\Python\PythonCore', 'HKLM:\SOFTWARE\WOW6432Node\Python\PythonCore', 'HKCU:\SOFTWARE\Python\PythonCore') {
+            if (Test-Path $key) { Remove-Item $key -Recurse -Force; Write-Host "Hid existing Python: $key" }
+          }
           $setup = (Get-ChildItem installer\Output\*.exe | Select-Object -First 1).FullName
           $p = Start-Process $setup -ArgumentList '/VERYSILENT','/SUPPRESSMSGBOXES','/NORESTART','/TASKS=desktopicon','/LOG=install.log' -Wait -PassThru
           if ($p.ExitCode -ne 0) { Get-Content install.log; throw "Installer failed with code $($p.ExitCode)" }
@@ -75,6 +80,7 @@ jobs:
           $lnk = (New-Object -ComObject WScript.Shell).CreateShortcut("$env:PUBLIC\Desktop\PythonIDE.lnk")
           Write-Host "Desktop shortcut runs: $($lnk.TargetPath) $($lnk.Arguments)"
           if (-not (Test-Path $lnk.TargetPath)) { throw "The shortcut points to a Python that does not exist" }
+          if ($lnk.TargetPath -notlike "*\Python38-32\pythonw.exe") { throw "Expected the bundled Python 3.8 to be installed and used" }
 
           $python = Join-Path (Split-Path $lnk.TargetPath) 'python.exe'
           & $python -c "import sys, tkinter; print('Using Python', sys.version, '- Tk', tkinter.TkVersion)"
